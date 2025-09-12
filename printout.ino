@@ -18,7 +18,7 @@ void print_out() {
     // Serial1.print(statusAktif);Serial1.print("\t");
     atitude_data();
     // motorServo_ManualTrimming();
-    // gainTuningFeedback();
+    gainTuningFeedback();
     motor_output();
     Serial1.println();
     previousTimeProgram = micros();
