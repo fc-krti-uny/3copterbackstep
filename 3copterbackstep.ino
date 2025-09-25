@@ -21,6 +21,9 @@
 //GPS
 #include <Arduino.h>
 
+//kompas
+#include <HMC5883L.h>
+
 // Konstanta radius bumi dalam meter
 #define EARTH_RADIUS_M 6371000.0
 
@@ -43,12 +46,12 @@ float accelX_filt, accelY_filt, accelZ_filt;
 float G_Dt           = 0.005;
 //----------------------Tuning Drone------------------------------------------
 
-float Kp_roll       = 5.7;              float Kp_roll2  = 1.5;
-float Ki_roll       = 0.3;              float Ki_roll2  = 0;
-float Kd_roll       = 0;                float Kd_roll2  = 0;
+float Kp_roll       = 4.5;              float Kp_roll2  = 2;
+float Ki_roll       = 0.35;              float Ki_roll2  = 0;
+float Kd_roll       = 0.9;                float Kd_roll2  = 0;
 
-float Kp_pitch      = 4;                float Kp_pitch2 = 1.7;
-float Ki_pitch      = 0.3;              float Ki_pitch2 = 0;
+float Kp_pitch      = 3.7;                float Kp_pitch2 = 1.85;
+float Ki_pitch      = 0.47;              float Ki_pitch2 = 0;
 float Kd_pitch      = 0;                float Kd_pitch2 = 0;
 
 float Kp_yaw        = 1;                float Kp_yaw2   = 0.5;
@@ -201,16 +204,16 @@ unsigned long pulse_length_esc1 = 1000,
 
 //================================================SERVO===========================================
 
-int servoAngleInit1 = 95;
-int servoAngleInit2 = 95;
+int servoAngleInit1 = 106;
+int servoAngleInit2 = 80;
 
 int servoAngleInitA = 96;
 int servoAngleInitB = 81;
 
-int servo1_up   = 75;
-int servo1_down = 115;
-int servo2_up   = 75;
-int servo2_down = 115;
+int servo1_up   = 86;
+int servo1_down = 126;
+int servo2_up   = 60;
+int servo2_down = 100;
 
 int servo1_up1   = 65;
 int servo1_down1 = 125;
@@ -254,25 +257,26 @@ uint8_t MS5611_address = 0x77;             //The I2C address of the MS5611 barom
 float AltitudeBaroGround,z_position,alt_ref,estimation_altitude;
 int axis;
 // ======================================================== COMPAS ======================================================================
-// Alamat I2C untuk sensor IST8310
-const int IST8310_I2C_ADDR = 0x0E;
+// // Alamat I2C untuk sensor IST8310
+// const int IST8310_I2C_ADDR = 0x0E;
 
-// Alamat Register
-const int WAI_REG = 0x00;        // Register "Who Am I"
-const int DEVICE_ID = 0x10;      // Nilai yang diharapkan dari WAI_REG
+// // Alamat Register
+// const int WAI_REG = 0x00;        // Register "Who Am I"
+// const int DEVICE_ID = 0x10;      // Nilai yang diharapkan dari WAI_REG
 
-const int OUTPUT_X_L_REG = 0x03; // Data LSB X
-const int OUTPUT_X_H_REG = 0x04; // Data MSB X
-const int OUTPUT_Y_L_REG = 0x05; // Data LSB Y
-const int OUTPUT_Y_H_REG = 0x06; // Data MSB Y
-const int OUTPUT_Z_L_REG = 0x07; // Data LSB Z
-const int OUTPUT_Z_H_REG = 0x08; // Data MSB Z
+// const int OUTPUT_X_L_REG = 0x03; // Data LSB X
+// const int OUTPUT_X_H_REG = 0x04; // Data MSB X
+// const int OUTPUT_Y_L_REG = 0x05; // Data LSB Y
+// const int OUTPUT_Y_H_REG = 0x06; // Data MSB Y
+// const int OUTPUT_Z_L_REG = 0x07; // Data LSB Z
+// const int OUTPUT_Z_H_REG = 0x08; // Data MSB Z
 
-const int CNTL1_REG = 0x0A;      // Register Kontrol 1
-const int CNTL2_REG = 0x0B;      // Register Kontrol 2
+// const int CNTL1_REG = 0x0A;      // Register Kontrol 1
+// const int CNTL2_REG = 0x0B;      // Register Kontrol 2
 
-const int AVGCNTL_REG = 0x41;    // Register untuk Averaging
+// const int AVGCNTL_REG = 0x41;    // Register untuk Averaging
 
+HMC5883L compass;
 float headingDegrees,heading;
 float fixedHeadingDegrees;
 
@@ -374,14 +378,14 @@ unsigned long transisiTime_current1;
 uint32_t timeProgram, previousTimeProgram;
 uint32_t timeServo, previousTimeServo;
 
-HardwareSerial Serial1(PA10,PA9);
+HardwareSerial Serial1(PA1,PA0);
 //==================================================================================================================================================
 
 void setup() {
   Serial1.begin(57600);
   #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
-  //   Wire.setSDA(PB9);
-  // Wire.setSCL(PB8);
+  Wire.setSDA(PB9);
+  Wire.setSCL(PB8);
   Wire.begin();
   Wire.setClock(400000); // 400kHz I2C clock. Comment this line if having compilation difficulties
   #elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
@@ -393,7 +397,7 @@ void setup() {
   elrsinit();
   motor_setup();
   // baro_initialized();
-  // compass_init();
+  compass_init();
   // init_gps();
   // Serial2.setRxBufferSize(512); // kalau core STM32 support
 }
@@ -405,13 +409,13 @@ void loop() {
 
   }
   get_YPR();
-  // compass_update();
+  compass_update();
   mapremote();
   SerialEvent();
   update_motor();
      
   // update_gps();
-    // updateBaro();
+  // updateBaro();
     // printgcs();
     // outputCompass();
   timeProgram = micros();

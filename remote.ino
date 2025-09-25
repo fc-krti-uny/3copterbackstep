@@ -159,31 +159,31 @@ void SerialEvent()
   //  if (inChar == 'y'){ servo1_up -= 1;servo1_down -= 1;servo2_up -= 1;servo2_down -= 1;}
   //  if (inChar == 'i'){ servo1_up += 1;servo1_down += 1;servo2_up -= 1;servo2_down -= 1;}
   //  if (inChar == 'o'){ servo1_up -= 1;servo1_down -= 1;servo2_up += 1;servo2_down += 1;}
-   if (inChar == 'u'){ servo1_up1 += 1;servo1_down1 += 1;}
-   if (inChar == 'y'){ servo1_up1 -= 1;servo1_down1 -= 1;}
-   if (inChar == 'i'){ servo2_up1 += 1;servo2_down1 += 1;}
-   if (inChar == 'o'){ servo2_up1 -= 1;servo2_down1 -= 1;}
+  //  if (inChar == 'u'){ servo1_up += 1;servo1_down += 1;}
+  //  if (inChar == 'y'){ servo1_up -= 1;servo1_down -= 1;}
+  //  if (inChar == 'i'){ servo2_up += 1;servo2_down += 1;}
+  //  if (inChar == 'o'){ servo2_up -= 1;servo2_down -= 1;}
 
     //========== gain tunning ==========
 //    //roll gain feedback ==========
-    //  if (inChar == 'q'){ Kp_roll += 0.1;}
-    //  if (inChar == 'w'){ Kp_roll -= 0.1;}
-    //  if (inChar == 'e'){ Ki_roll += 0.001;}
-    //  if (inChar == 'r'){ Ki_roll -= 0.001;}
-    //  if (inChar == 't'){ Kd_roll += 0.01;}
-    //  if (inChar == 'y'){ Kd_roll -= 0.01;}
-    //  if (inChar == 'u'){ Kp_roll2 += 0.01;}
-    //  if (inChar == 'i'){ Kp_roll2 -= 0.01;}
+     if (inChar == 'q'){ Kp_roll += 0.1;}
+     if (inChar == 'w'){ Kp_roll -= 0.1;}
+     if (inChar == 'e'){ Ki_roll += 0.001;}
+     if (inChar == 'r'){ Ki_roll -= 0.001;}
+     if (inChar == 't'){ Kd_roll += 0.01;}
+     if (inChar == 'y'){ Kd_roll -= 0.01;}
+     if (inChar == 'u'){ Kp_roll2 += 0.01;}
+     if (inChar == 'i'){ Kp_roll2 -= 0.01;}
    
 //    //pitch gain feedback ==========
-    //  if (inChar == 'a'){ Kp_pitch += 0.1;}
-    //  if (inChar == 's'){ Kp_pitch -= 0.1;}
-    //  if (inChar == 'd'){ Ki_pitch += 0.01;}
-    //  if (inChar == 'f'){ Ki_pitch -= 0.01;}
-    //  if (inChar == 'g'){ Kd_pitch += 0.01;}
-    //  if (inChar == 'h'){ Kd_pitch -= 0.01;}
-    //  if (inChar == 'j'){ Kp_pitch2 += 0.01;}
-    //  if (inChar == 'k'){ Kp_pitch2 -= 0.01;}
+     if (inChar == 'a'){ Kp_pitch += 0.1;}
+     if (inChar == 's'){ Kp_pitch -= 0.1;}
+     if (inChar == 'd'){ Ki_pitch += 0.01;}
+     if (inChar == 'f'){ Ki_pitch -= 0.01;}
+     if (inChar == 'g'){ Kd_pitch += 0.01;}
+     if (inChar == 'h'){ Kd_pitch -= 0.01;}
+     if (inChar == 'j'){ Kp_pitch2 += 0.01;}
+     if (inChar == 'k'){ Kp_pitch2 -= 0.01;}
 
     //  if (inChar == 'z'){ Kp_pos += 0.01;}
     //  if (inChar == 'x'){ Kp_pos -= 0.01;}

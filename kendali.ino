@@ -112,13 +112,13 @@ void controlDrone(){
        pulse_length_esc1 = throttle_channel + (pitchControl) + (rollControl) + altControl; 
        pulse_length_esc3 = throttle_channel - (pitchControl) + altControl; 
        pulse_length_esc2 = throttle_channel + (pitchControl) - (rollControl) + altControl;
-       pulse_length_servo1 = (yawControl*-1);
-       pulse_length_servo2 = (yawControl*-1);
+       pulse_length_servo1 = (yawControl*1);
+       pulse_length_servo2 = (yawControl*1);
 
     pulse_length_esc1 = constrain(pulse_length_esc1, 1100, 2000);
     pulse_length_esc2 = constrain(pulse_length_esc2, 1100, 2000);
     pulse_length_esc3 = constrain(pulse_length_esc3, 1100, 2000);
-    pulse_length_esc3 = map(pulse_length_esc3, 1100, 2000, 1100, 1800);
+    pulse_length_esc3 = map(pulse_length_esc3, 1100, 2000, 1100, 1850);
     pulse_length_servo1 = constrain(pulse_length_servo1, -30, 30);pulse_length_servo1 = map(pulse_length_servo1, -30, 30, servo1_down, servo1_up);
     pulse_length_servo2 = constrain(pulse_length_servo2, -30, 30);pulse_length_servo2 = map(pulse_length_servo2, -30, 30, servo2_down, servo2_up);
     statusmode = 0;

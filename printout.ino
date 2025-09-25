@@ -2,8 +2,8 @@ void print_out() {
   timeProgram = micros();
   if (timeProgram - previousTimeProgram >= 100000) 
   {
-    Serial1.print(millis());Serial1.print("\t");
-    Serial1.print(throttle_channel);Serial1.print("\t");
+    Serial1.print  (millis());Serial1.print("\t");
+    // Serial1.print(throttle_channel);Serial1.print("\t");
     // Serial1.print(roll_input);Serial1.print("\t");
     // Serial1.print(target_roll);Serial1.print("\t");
     // Serial1.print(pitch_input);Serial1.print("\t");
@@ -30,13 +30,14 @@ void atitude_data() {
   Serial1.print(pitch_deg)      ;Serial1.print("\t");
   Serial1.print(yaw_deg)      ;Serial1.print("\t");
   Serial1.print(fixedHeadingDegrees)      ;Serial1.print("\t");
+  // Serial1.print(altitude_m)      ;Serial1.print("\t");
   // Serial1.print(gps_lat,7)      ;Serial1.print("\t");
   // Serial1.print(gps_lon,7)      ;Serial1.print("\t");
 }
 
 void motor_output(){
-  Serial1.print(pulse_length_esc1)      ;Serial1.print("\t");
-  Serial1.print(pulse_length_esc2)      ;Serial1.print("\t");
+  // Serial1.print(pulse_length_esc1)      ;Serial1.print("\t");
+  // Serial1.print(pulse_length_esc2)      ;Serial1.print("\t");
   // Serial1.print(pulse_length_esc3)      ;Serial1.print("\t");
   // Serial1.print(pulse_length_servo1)      ;Serial1.print("\t");
   // Serial1.print(pulse_length_servo2)      ;Serial1.print("\t");
@@ -46,18 +47,18 @@ void motor_output(){
 
 void gainTuningFeedback()
 {
-  // Serial1.print(Kp_roll,2)      ;Serial1.print("\t");
-  // Serial1.print(Ki_roll,4)      ;Serial1.print("\t");
-  // Serial1.print(Kd_roll,3)      ;Serial1.print("\t");
-  // Serial1.print(Kp_roll2,3)      ;Serial1.print("\t");
+  Serial1.print(Kp_roll,2)      ;Serial1.print("\t");
+  Serial1.print(Ki_roll,4)      ;Serial1.print("\t");
+  Serial1.print(Kd_roll,3)      ;Serial1.print("\t");
+  Serial1.print(Kp_roll2,3)      ;Serial1.print("\t");
 
-  // Serial1.print(Kp_pitch,2)      ;Serial1.print("\t");
-  // Serial1.print(Ki_pitch,4)      ;Serial1.print("\t");
-  // Serial1.print(Kd_pitch,3)      ;Serial1.print("\t");
-  // Serial1.print(Kp_pitch2,3)      ;Serial1.print("\t");
+  Serial1.print(Kp_pitch,2)      ;Serial1.print("\t");
+  Serial1.print(Ki_pitch,4)      ;Serial1.print("\t");
+  Serial1.print(Kd_pitch,3)      ;Serial1.print("\t");
+  Serial1.print(Kp_pitch2,3)      ;Serial1.print("\t");
 
-  Serial1.print(Kp_pos,2)      ;Serial1.print("\t");
-  Serial1.print(Kp_vel,2)      ;Serial1.print("\t");
+  // Serial1.print(Kp_pos,2)      ;Serial1.print("\t");
+  // Serial1.print(Kp_vel,2)      ;Serial1.print("\t");
   // Serial1.print(gain_yaw,3)      ;Serial1.print("\t");
   // Serial1.print(gain_vel_yaw,4)  ;Serial1.print("\t");
 }

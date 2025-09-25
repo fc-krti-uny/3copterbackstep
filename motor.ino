@@ -54,12 +54,12 @@ void update_motor()
       pulse_length_esc2 -= yawtrans;
 
       transisiTime_current = millis();
-      if((transisiTime_current - transisiTime_previous >= 20)){pitch_transisi += 1; transisiTime_previous = transisiTime_current;}
+      if((transisiTime_current - transisiTime_previous >= 100)){pitch_transisi += 1; transisiTime_previous = transisiTime_current;}
       if(pitch_transisi > 35){pitch_transisi = 35; pulse_length_esc1 += 150; pulse_length_esc2 += 150;}
-      pitch_transisi1 = (90-pitch_transisi)+(yawControl*-1); 
-      pitch_transisi2 = (pitch_transisi+90)+(yawControl*-1);
-      pitch_transisi1 = constrain(pitch_transisi1, 55, 90);
-      pitch_transisi2 = constrain(pitch_transisi2, 90, 125);
+      pitch_transisi1 = (106-pitch_transisi)+(yawControl*-1); 
+      pitch_transisi2 = (pitch_transisi+80)+(yawControl*-1);
+      pitch_transisi1 = constrain(pitch_transisi1, 71, 91);
+      pitch_transisi2 = constrain(pitch_transisi2, 95, 125);
       // if(pitch_transisi > 40){pitch_transisi2 = 135;}
       // if(pitch_transisi==40){fwhead1 =1;}
       motA.writeMicroseconds(pulse_length_esc1);
@@ -119,17 +119,17 @@ void update_motor()
   if(armStatus==1 && ch6==2){
     controlPlane();
     transisiTime_current = millis();
-    if((transisiTime_current - transisiTime_previous >= 50)){pitch_transisi += 1; transisiTime_previous = transisiTime_current;}
-    if(pitch_transisi > 90){pitch_transisi = 90;}
+    // if((transisiTime_current - transisiTime_previous >= 50)){pitch_transisi += 1; transisiTime_previous = transisiTime_current;}
+    // if(pitch_transisi > 90){pitch_transisi = 90;}
     
-    pitch_transisi1 = 95-pitch_transisi; 
-    pitch_transisi2 = pitch_transisi+90;
-    if(pitch_transisi > 80){pitch_transisi2 = 170;}
+    // pitch_transisi1 = 106-pitch_transisi; 
+    // pitch_transisi2 = pitch_transisi+80;
+    // if(pitch_transisi > 80){pitch_transisi2 = 170;}
     motA.writeMicroseconds(throttle_channel);
     motB.writeMicroseconds(throttle_channel);
     motC.writeMicroseconds(1000);
-    myservoX.write(pitch_transisi1);
-    myservoY.write(pitch_transisi2);
+    myservoX.write(0);
+    myservoY.write(180);
     myservoA.write(Servo1);
     myservoB.write(Servo2);
   }
