@@ -80,7 +80,7 @@ void printNavPvt(const NAV_PVT_t& p) {
   // Serial1.print(" Sats: "); Serial1.print(p.numSV);
   gps_sats = p.numSV;
 
-  if (validFix) {
+  if (validFix) { 
     gps_lat = p.lat / 1e7;
     gps_lon = p.lon / 1e7;
     // double alt_m = p.hMSL / 1000.0;

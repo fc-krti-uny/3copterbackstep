@@ -49,17 +49,17 @@ void update_motor()
       controlPlane();
       controlDrone();
       yawtrans = ((yaw_control)*2) + (gz*(0.8));
-      yawtrans=constrain(yawtrans,-30,30);
+      yawtrans=constrain(yawtrans,-50,50);
       pulse_length_esc1 += yawtrans;
       pulse_length_esc2 -= yawtrans;
 
       transisiTime_current = millis();
-      if((transisiTime_current - transisiTime_previous >= 100)){pitch_transisi += 1; transisiTime_previous = transisiTime_current;}
-      if(pitch_transisi > 35){pitch_transisi = 35; pulse_length_esc1 += 150; pulse_length_esc2 += 150;}
-      pitch_transisi1 = (106-pitch_transisi)+(yawControl*-1); 
-      pitch_transisi2 = (pitch_transisi+80)+(yawControl*-1);
-      pitch_transisi1 = constrain(pitch_transisi1, 71, 91);
-      pitch_transisi2 = constrain(pitch_transisi2, 95, 125);
+      if((transisiTime_current - transisiTime_previous >= 50)){pitch_transisi += 1; transisiTime_previous = transisiTime_current;}
+      if(pitch_transisi > 25){pitch_transisi = 25; pulse_length_esc1 += 200; pulse_length_esc2 += 200;}
+      pitch_transisi2 = (100-pitch_transisi)-(yawControl*1); 
+      pitch_transisi1 = (pitch_transisi+78)-(yawControl*1);
+      pitch_transisi1 = constrain(pitch_transisi1, 78, 113);
+      pitch_transisi2 = constrain(pitch_transisi2, 65, 100);
       // if(pitch_transisi > 40){pitch_transisi2 = 135;}
       // if(pitch_transisi==40){fwhead1 =1;}
       motA.writeMicroseconds(pulse_length_esc1);
@@ -67,8 +67,8 @@ void update_motor()
       motC.writeMicroseconds(pulse_length_esc3);
       myservoX.write(pitch_transisi1);
       myservoY.write(pitch_transisi2);
-      myservoA.write(80);
-      myservoB.write(102);
+      myservoA.write(Servo1);
+      myservoB.write(Servo2);
     //  if(fwhead1 == 0){ 
     //   if(statusAktif == 0){
     //   transisiTime_current = millis();
@@ -128,8 +128,8 @@ void update_motor()
     motA.writeMicroseconds(throttle_channel);
     motB.writeMicroseconds(throttle_channel);
     motC.writeMicroseconds(1000);
-    myservoX.write(0);
-    myservoY.write(180);
+    myservoX.write(180);
+    myservoY.write(0);
     myservoA.write(Servo1);
     myservoB.write(Servo2);
   }

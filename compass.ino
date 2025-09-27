@@ -31,6 +31,7 @@ void compass_update()
   // Calculate heading
   float heading = atan2(norm.YAxis, norm.XAxis);
 
+
   // Set declination angle on your location and fix heading
   // You can find your declination on: http://magnetic-declination.com/
   // (+) Positive or (-) for negative
@@ -78,6 +79,29 @@ fixedHeadingDegrees = headingDegrees;
     // Serial1.print("\t| Raw h: "); Serial1.print(headingDegrees);
     // Serial1.print("\t| Raw fh: "); Serial1.println(fixedHeadingDegrees);
   // }
+}
+
+void compass_compentation()
+{
+//  Vector norm = compass.readNormalize();
+//  accelX = ax*2.0 / 32768.0;
+//  accelY = ay*2.0 / 32768.0;
+
+//  accelX = constrain(accelX, -1, 1);
+//  accelY = constrain(accelY, -1, 1);
+
+//  compensatePitch = asin(-accelX);
+//  compensateRoll  = asin(accelY);
+
+//  cosComRoll  = cos(compensateRoll);
+//  sinComRoll  = sin(compensateRoll);
+//  cosComPitch = cos(compensatePitch);
+//  sinComPitch = sin(compensatePitch);
+
+//  Xh = norm.XAxis*cosComPitch + norm.ZAxis*sinComPitch;
+//  Yh = norm.XAxis*sinComRoll*sinComPitch + norm.YAxis*cosComRoll - norm.ZAxis*sinComRoll*cosComPitch;
+//  Yh = norm.YAxis*cosComRoll + norm.ZAxis*sinComRoll;
+//  Xh = norm.XAxis*cosComPitch + norm.YAxis*sinComRoll*sinComPitch - norm.ZAxis*cosComRoll*sinComPitch;
 }
 
 float mapFloat(float x, float in_min, float in_max, float out_min, float out_max) {

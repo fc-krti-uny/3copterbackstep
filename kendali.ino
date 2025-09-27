@@ -7,13 +7,13 @@ void controlDrone(){
   error_roll1=(roll_input+target_roll)-roll_deg;
   error_pitch1=(pitch_input*-1+target_pitch*-1)-pitch_deg;
   error_yaw1=(yaw_input*-1)-yaw_control;
-  error_alt1=alt_input-altitude_cm;
+  error_alt1=alt_input-altitude_m;
   error_pos=0-distance_cm;
 
-  integral_error_roll1+=error_roll1*0.01;
-  integral_error_pitch1+=error_pitch1*0.01;
-  integral_error_yaw1+=error_yaw1*0.01;
-  integral_error_alt1+=error_alt1*0.01;
+  integral_error_roll1+=error_roll1*0.01;     integral_error_roll1 = constrain(integral_error_roll1, -200, 200);
+  integral_error_pitch1+=error_pitch1*0.01;   integral_error_pitch1 = constrain(integral_error_pitch1, -200, 200); 
+  integral_error_yaw1+=error_yaw1*0.01;       integral_error_yaw1 = constrain(integral_error_yaw1, -200, 200);
+  integral_error_alt1+=error_alt1*0.01;       integral_error_alt1 = constrain(integral_error_alt1, -200, 200);
   integral_error_pos+=error_pos*0.01;
 
   derivative_error_roll1=(error_roll1-last_error_roll1)/0.01;
@@ -61,14 +61,14 @@ void controlDrone(){
   if(PID_value_roll > PID_max){PID_value_roll = PID_max;} else if(PID_value_roll < PID_max*-1){PID_value_roll = PID_max*-1;}
   if(PID_value_pitch > PID_max){PID_value_pitch = PID_max;} else if(PID_value_pitch < PID_max*-1){PID_value_pitch = PID_max*-1;}
   if(PID_value_yaw > PID_max){PID_value_yaw = PID_max;} else if(PID_value_yaw < PID_max*-1){PID_value_yaw = PID_max*-1;}
-  if(PID_value_alt > 200){PID_value_alt = 200;} else if(PID_value_alt < -200){PID_value_alt = -200;}
+  if(PID_virtual_alt > 200){PID_value_alt = 200;} else if(PID_virtual_alt < -200){PID_value_alt = -200;}
   PID_value_vel=constrain(PID_value_vel,-15,15);
   }
 
     rollControl  = PID_value_roll;
     pitchControl = PID_value_pitch;
     yawControl   = PID_value_yaw;
-    altControl   = PID_value_alt;
+    altControl   = PID_virtual_alt;
 
 //     if(ch7 == 0 && ch5 == 1 && ch6 == 0) {latitude_init = latitude; longitude_init = longitude; latitude_home = latitude; longitude_home = longitude; init_Home = 0; waypoint_index = 0; tracking = 0; cek_heading = 0; bearing = 0;pitch_on = 0;pitch_off = 0;}
 //     if(((ch7  == 1 && head_mode == 1 && ch5 == 1 && ch6 == 0)||darurat == 1)) {waypointMission();}
@@ -109,21 +109,25 @@ void controlDrone(){
 //      if(head_mode == 0){
 //        throttle=  thrchaottle_nnel;
 //      }
-       pulse_length_esc1 = throttle_channel + (pitchControl) + (rollControl) + altControl; 
-       pulse_length_esc3 = throttle_channel - (pitchControl) + altControl; 
-       pulse_length_esc2 = throttle_channel + (pitchControl) - (rollControl) + altControl;
+       pulse_length_esc1 = throttle_channel + (pitchControl) + (rollControl) + (altControl); 
+       pulse_length_esc3 = throttle_channel - (pitchControl) + (altControl); 
+       pulse_length_esc2 = throttle_channel + (pitchControl) - (rollControl) + (altControl);
        pulse_length_servo1 = (yawControl*1);
        pulse_length_servo2 = (yawControl*1);
 
     pulse_length_esc1 = constrain(pulse_length_esc1, 1100, 2000);
     pulse_length_esc2 = constrain(pulse_length_esc2, 1100, 2000);
     pulse_length_esc3 = constrain(pulse_length_esc3, 1100, 2000);
-    pulse_length_esc3 = map(pulse_length_esc3, 1100, 2000, 1100, 1850);
+    pulse_length_esc3 = map(pulse_length_esc3, 1100, 2000, 1100, 1800);
     pulse_length_servo1 = constrain(pulse_length_servo1, -30, 30);pulse_length_servo1 = map(pulse_length_servo1, -30, 30, servo1_down, servo1_up);
     pulse_length_servo2 = constrain(pulse_length_servo2, -30, 30);pulse_length_servo2 = map(pulse_length_servo2, -30, 30, servo2_down, servo2_up);
     statusmode = 0;
     // pitch_transisi = 0;
 }
+
+//===========================================================================================================================================================================================
+//=======================                                                      MODE PESAWAT                                                               =====================================================================================
+//===========================================================================================================================================================================================
 
 void controlPlane(){
   if(ch6==0){roll_input1=pitch_input1=yaw_input1=0;}
@@ -135,19 +139,23 @@ void controlPlane(){
 //===============================================================VIRTUAL PID==============================================================
   error_roll2=(roll_input1)-roll_deg;
   error_pitch2=(pitch_input1)-pitch_deg;
+  error_alt2=alt_input-altitude_m;
+  
 
-  integral_error_roll2+=error_roll2*0.01;
-  integral_error_pitch2+=error_pitch2*0.01;
+  integral_error_roll2+=error_roll2*0.01;   integral_error_roll2 = constrain(integral_error_roll2, -15, 15);
+  integral_error_pitch2+=error_pitch2*0.01; integral_error_pitch2 = constrain(integral_error_pitch2, -15, 15);
+  integral_error_alt2+=error_alt2*0.01;
 
   derivative_error_roll2=(error_roll2-last_error_roll2)/0.01;
   derivative_error_pitch2=(error_pitch2-last_error_pitch2)/0.01;
+  derivative_error_alt2=(error_alt2-last_error_alt2)/0.01;
 
-  Proll2=Kp_roll3*error_roll2;                 Ppitch2=Kp_pitch3*error_pitch2;
-  Iroll2=Ki_roll3*integral_error_roll2;        Ipitch2=Ki_pitch3*integral_error_pitch2;
-  Droll2=Kd_roll3*(derivative_error_roll2);    Dpitch2=Kd_pitch3*(derivative_error_pitch2);
-  last_error_roll2=error_roll2;                last_error_pitch2=error_pitch2;
+  Proll2=Kp_roll3*error_roll2;                 Ppitch2=Kp_pitch3*error_pitch2;                  Palt2=Kp_alt3*error_alt2;
+  Iroll2=Ki_roll3*integral_error_roll2;        Ipitch2=Ki_pitch3*integral_error_pitch2;         Ialt2=Ki_alt3*integral_error_alt2;
+  Droll2=Kd_roll3*(derivative_error_roll2);    Dpitch2=Kd_pitch3*(derivative_error_pitch2);     Dalt2=Kd_alt3*(derivative_error_alt2);
+  last_error_roll2=error_roll2;                last_error_pitch2=error_pitch2;                  last_error_alt2=error_alt2;
 
-  PID_virtual_roll2 = Proll2 + Iroll2 + Droll2;   PID_virtual_pitch2 = Ppitch2 + Ipitch2 + Dpitch2;
+  PID_virtual_roll2 = Proll2 + Iroll2 + Droll2;   PID_virtual_pitch2 = Ppitch2 + Ipitch2 + Dpitch2;   PID_virtual_alt2 = Palt2 + Ialt2 + Dalt2;
 
 //==============================================================ACTUAL PID========================================================
   error_roll3=PID_virtual_roll2-gx;
@@ -159,7 +167,7 @@ void controlPlane(){
   derivative_error_roll3=(error_roll3-last_error_roll3)/0.01;
   derivative_error_pitch3=(error_pitch3-last_error_pitch3)/0.01;
 
-  Proll3=Kp_roll4*error_roll3;                 Ppitch3=Kp_pitch4*error_pitch3;                
+  Proll3=Kp_roll4*error_roll3;                 Ppitch3=Kp_pitch4*error_pitch3;                           
   Iroll3=Ki_roll4*integral_error_roll3;        Ipitch3=Ki_pitch4*integral_error_pitch3;        
   Droll3=Kd_roll4*(derivative_error_roll3);    Dpitch3=Kd_pitch4*(derivative_error_pitch3);   
   last_error_roll3=error_roll3;                last_error_pitch3=error_pitch3;                 
@@ -169,19 +177,27 @@ void controlPlane(){
 
   if(PID_value_roll > PID_max2){PID_value_roll = PID_max2;} else if(PID_value_roll < PID_max2*-1){PID_value_roll = PID_max2*-1;}
   if(PID_value_pitch > PID_max2){PID_value_pitch = PID_max2;} else if(PID_value_pitch < PID_max2*-1){PID_value_pitch = PID_max2*-1;}
+  if(PID_virtual_alt2 > 20){PID_virtual_alt2 = 20;} else if(PID_virtual_alt2 < -20){PID_virtual_alt2 = -20;}
   }
-  rollControl2  = PID_value_roll;
-  pitchControl2 = PID_value_pitch;
+  rollControl2  = PID_value_roll2;
+  pitchControl2 = PID_value_pitch2;
+  altControl2 = PID_virtual_alt2;
 
-  rollControl    = constrain(rollControl2, -30, 30);
-  pitchControl   = constrain(pitchControl2, -30, 30);
+  if(ch5 == 1 && head_mode == 0){ altitudeControl_ref = altitude_m;}
+  if(ch5 == 1 && head_mode == 1){ alt_input =  altitudeControl_ref;}
+  if(ch7 == 0 && ch5 == 1) {throttle = throttle_channel; latitude_init = gps_lat; longitude_init = gps_lon; 
+                                        init_Home = 0; waypoint_index = 0; tracking = 0; cek_heading = 0; bearing = 0;}
 
-  Servo1 = (rollControl2) - (pitchControl2*1); Servo1 = constrain(Servo1, -40,40); Servo1 = map(Servo1,-40,40,servo1_down1,servo1_up1); 
-  Servo2 = (rollControl2) + (pitchControl2*1); Servo2 = constrain(Servo2, -40,40); Servo2 = map(Servo2,-40,40,servo2_down1,servo2_up1); 
+  rollControl2    = constrain(rollControl2, -30, 30);
+  pitchControl2   = constrain(pitchControl2, -30, 30);
+  altControl2     = constrain(altControl2, -20, 20);
+
+  Servo1 = (rollControl2) - (pitchControl2*1) + altControl2; Servo1 = constrain(Servo1, -40,40); Servo1 = map(Servo1,-40,40,servo1_down1,servo1_up1); 
+  Servo2 = (rollControl2) + (pitchControl2*1) + altControl2; Servo2 = constrain(Servo2, -40,40); Servo2 = map(Servo2,-40,40,servo2_down1,servo2_up1); 
  }
   if(ch7==0){
-   Servo1 = (roll_input1) - (pitch_input1*1); Servo1 = constrain(Servo1, -40,40); Servo1 = map(Servo1,-40,40,servo1_down1,servo1_up1); 
-   Servo2 = (roll_input1) + (pitch_input1*1); Servo2 = constrain(Servo2, -40,40); Servo2 = map(Servo2,-40,40,servo2_down1,servo2_up1); 
+   Servo1 = (roll_input1) - (pitch_input1*-1); Servo1 = constrain(Servo1, -40,40); Servo1 = map(Servo1,-40,40,servo1_down1,servo1_up1); 
+   Servo2 = (roll_input1) + (pitch_input1*-1); Servo2 = constrain(Servo2, -40,40); Servo2 = map(Servo2,-40,40,servo2_down1,servo2_up1); 
   }
 }
 
