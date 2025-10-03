@@ -1,43 +1,92 @@
 void compass_init()
 {
-  // Initialize Initialize HMC5883L
-  Serial1.println("Initialize HMC5883L");
-  while (!compass.begin())
-  {
-    Serial1.println("Could not find a valid HMC5883L sensor, check wiring!");
-    delay(500);
+  Serial1.println("Mencoba inisialisasi sensor IST8310...");
+
+  // 1. Reset sensor untuk memastikan kondisi awal yang bersih
+  Wire2.beginTransmission(IST8310_I2C_ADDR);
+  Wire2.write(CNTL2_REG);
+  Wire2.write(0x01); // Kirim perintah reset
+  if (Wire2.endTransmission() != 0) {
+    Serial1.println("Gagal mengirim perintah reset. Cek koneksi.");
+    while(1);
   }
+  delay(10); // Beri waktu sensor untuk memproses reset
 
-  // Set measurement range
-  compass.setRange(HMC5883L_RANGE_1_3GA);
+  // 2. Verifikasi identitas sensor dengan membaca register "Who Am I"
+  Wire2.beginTransmission(IST8310_I2C_ADDR);
+  Wire2.write(WAI_REG);
+  Wire2.endTransmission();
+  
+  Wire2.requestFrom(IST8310_I2C_ADDR, 1);
+  if (Wire2.available()) {
+    byte deviceId = Wire2.read();
+    if (deviceId == DEVICE_ID) {
+      Serial1.println("Sensor IST8310 berhasil ditemukan dan diverifikasi!");
+    } else {
+      Serial1.print("Perangkat merespons, tapi ID tidak cocok! Diharapkan 0x10, diterima 0x");
+      Serial1.println(deviceId, HEX);
+      while(1); // Hentikan program jika sensor tidak cocok
+    }
+  } else {
+    Serial1.println("Sensor IST8310 tidak ditemukan di alamat 0x0E. Cek wiring!");
+    while(1); // Hentikan program jika tidak ada respons
+  }
+  
+  // 3. Konfigurasi sensor (contoh: mengatur averaging untuk pembacaan yang lebih stabil)
+  Wire2.beginTransmission(IST8310_I2C_ADDR);
+  Wire2.write(AVGCNTL_REG);
+  Wire2.write(0x24); // Mengatur rata-rata 16x untuk Y dan 16x untuk XZ
+  Wire2.endTransmission();
 
-  // Set measurement mode
-  compass.setMeasurementMode(HMC5883L_CONTINOUS);
-
-  // Set data rate
-  compass.setDataRate(HMC5883L_DATARATE_30HZ);
-
-  // Set number of samples averaged
-  compass.setSamples(HMC5883L_SAMPLES_8);
-
-  // Set calibration offset. See HMC5883L_calibration.ino
-  compass.setOffset(0, 0, 0);
+  Serial1.println("Inisialisasi selesai. Memulai pembacaan data...");
+  Serial1.println("-------------------------------------------------");
 }
 
 void compass_update()
 {
-  Vector norm = compass.readNormalize();
+    // 1. Minta sensor untuk melakukan satu kali pengukuran (Single Measurement Mode)
+  Wire2.beginTransmission(IST8310_I2C_ADDR);
+  Wire2.write(CNTL1_REG);
+  Wire2.write(0x01);
+  Wire2.endTransmission();
+
+  // delay(20); // Beri waktu sensor untuk menyelesaikan pengukuran
+
+  // 2. Baca 6 byte data (X, Y, Z) dari sensor
+  Wire2.beginTransmission(IST8310_I2C_ADDR);
+  Wire2.write(OUTPUT_X_L_REG); // Tunjuk ke register data X LSB sebagai awal pembacaan
+  Wire2.endTransmission();
+
+  Wire2.requestFrom(IST8310_I2C_ADDR, 6);
+
+  // Pastikan kita menerima 6 byte data sebelum memprosesnya
+  if (Wire2.available() >= 6) {
+    // Data masuk dalam urutan: X_LSB, X_MSB, Y_LSB, Y_MSB, Z_LSB, Z_MSB
+    uint8_t x_lsb = Wire2.read();
+    uint8_t x_msb = Wire2.read();
+    uint8_t y_lsb = Wire2.read();
+    uint8_t y_msb = Wire2.read();
+    uint8_t z_lsb = Wire2.read();
+    uint8_t z_msb = Wire2.read();
+
+    // Gabungkan byte LSB dan MSB menjadi nilai integer 16-bit
+    // (byte MSB digeser 8 bit ke kiri, lalu digabungkan dengan byte LSB)
+    int16_t rawX = (int16_t)((x_msb << 8) | x_lsb);
+    int16_t rawY = (int16_t)((y_msb << 8) | y_lsb);
+    int16_t rawZ = (int16_t)((z_msb << 8) | z_lsb);
+
+    // Negasikan nilai Z untuk menyesuaikan dengan konvensi navigasi 'right-hand rule'
+    rawZ = -rawZ;
 
   // Calculate heading
-  float heading = atan2(norm.YAxis, norm.XAxis);
-
+  float heading = atan2(rawY, rawX);
 
   // Set declination angle on your location and fix heading
   // You can find your declination on: http://magnetic-declination.com/
   // (+) Positive or (-) for negative
   // For Bytom / Poland declination angle is 4'26E (positive)
   // Formula: (deg + (min / 60.0)) / (180 / M_PI);
-  float declinationAngle = (4.0 + (26.0 / 60.0)) / (180 / M_PI);
+  float declinationAngle = (0.0 + (46.0 / 60.0)) / (180 / M_PI);
   heading += declinationAngle;
 
   // Correct for heading < 0deg and heading > 360deg
@@ -53,55 +102,32 @@ void compass_update()
 
   // Convert to degrees
   headingDegrees = heading * 180/M_PI; 
-fixedHeadingDegrees = headingDegrees;
+// fixedHeadingDegrees = headingDegrees;
   // Fix HMC5883L issue with angles
  
-  // if (headingDegrees >= 90 && headingDegrees < 360)
-  // {
-  //   fixedHeadingDegrees = mapFloat(headingDegrees, 90, 360, 0, 270);
-  // } else
-  // if (headingDegrees >= 0 && headingDegrees < 90)
-  // {
-  //   fixedHeadingDegrees = mapFloat(headingDegrees, 0, 90, 270, 360);
-  // }
+  if (headingDegrees >= 90 && headingDegrees < 360)
+  {
+    fixedHeadingDegrees = mapFloat(headingDegrees, 90, 360, 0, 270);
+  } else
+  if (headingDegrees >= 0 && headingDegrees < 90)
+  {
+    fixedHeadingDegrees = mapFloat(headingDegrees, 0, 90, 270, 360);
+  }
 
-    // yaw_reference = set_yaw - headingDegrees;
-    // if(yaw_reference >   180) { yaw_reference -= 360;}
-    // if(yaw_reference < - 180) { yaw_reference += 360;}
-    // yaw_control = yaw_reference;
-    // yawPrev = yaw_deg;
+    yaw_reference = set_yaw - fixedHeadingDegrees;
+    if(yaw_reference >   180) { yaw_reference -= 360;}
+    if(yaw_reference < - 180) { yaw_reference += 360;}
+    yaw_control = yaw_reference;
+    yawPrev = fixedHeadingDegrees;
 
-    // if(yaw_channel <= 1450 || yaw_channel >= 1550|| ch5==0)set_yaw = headingDegrees;
+    if(yaw_channel <= 1450 || yaw_channel >= 1550|| ch5==0)set_yaw = fixedHeadingDegrees;
   // Tampilkan data mentah yang sudah digabungkan ke Serial1 Monitor
     // Serial1.print("Raw X: "); Serial1.print(rawX);
     // Serial1.print("\t| Raw Y: "); Serial1.print(rawY);
     // Serial1.print("\t| Raw Z: "); Serial1.print(rawZ);
     // Serial1.print("\t| Raw h: "); Serial1.print(headingDegrees);
     // Serial1.print("\t| Raw fh: "); Serial1.println(fixedHeadingDegrees);
-  // }
-}
-
-void compass_compentation()
-{
-//  Vector norm = compass.readNormalize();
-//  accelX = ax*2.0 / 32768.0;
-//  accelY = ay*2.0 / 32768.0;
-
-//  accelX = constrain(accelX, -1, 1);
-//  accelY = constrain(accelY, -1, 1);
-
-//  compensatePitch = asin(-accelX);
-//  compensateRoll  = asin(accelY);
-
-//  cosComRoll  = cos(compensateRoll);
-//  sinComRoll  = sin(compensateRoll);
-//  cosComPitch = cos(compensatePitch);
-//  sinComPitch = sin(compensatePitch);
-
-//  Xh = norm.XAxis*cosComPitch + norm.ZAxis*sinComPitch;
-//  Yh = norm.XAxis*sinComRoll*sinComPitch + norm.YAxis*cosComRoll - norm.ZAxis*sinComRoll*cosComPitch;
-//  Yh = norm.YAxis*cosComRoll + norm.ZAxis*sinComRoll;
-//  Xh = norm.XAxis*cosComPitch + norm.YAxis*sinComRoll*sinComPitch - norm.ZAxis*cosComRoll*sinComPitch;
+  }
 }
 
 float mapFloat(float x, float in_min, float in_max, float out_min, float out_max) {

@@ -83,11 +83,19 @@ void printNavPvt(const NAV_PVT_t& p) {
   if (validFix) { 
     gps_lat = p.lat / 1e7;
     gps_lon = p.lon / 1e7;
-    // double alt_m = p.hMSL / 1000.0;
+    alt_m = p.hMSL / 1000.0;
     gps_speed = p.gSpeed / 10.0;   // mm/s -> m/s
     // gps_speed = gps_speed * (float)0.985 + gps_speed_fast * (float)0.015;
     // double spd_cms = p.gSpeed / 10.0;    // mm/s -> cm/s
-
+  if(ch5 == 0){ AltitudeBaroGround = alt_m; axis = 0; z_position = 0;}
+  if(ch5 == 1)
+  {
+    if(axis == 0){ 
+      alt_ref = AltitudeBaroGround;  estimation_altitude = 0; 
+    }
+    estimation_altitude = alt_m - alt_ref;
+    z_position = estimation_altitude; axis = 1;
+  }
     // Serial1.print(" Lat: "); Serial1.print(gps_lat, 7);
     // Serial1.print(" Lon: "); Serial1.print(gps_lon, 7);
     // Serial.print(" Alt(m): "); Serial.print(alt_m, 2);

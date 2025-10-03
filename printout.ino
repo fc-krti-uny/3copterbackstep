@@ -3,15 +3,15 @@ void print_out() {
   if (timeProgram - previousTimeProgram >= 100000) 
   {
     // Serial1.print(millis());Serial1.print("\t");
-    // Serial1.print(throttle_channel);Serial1.print("\t");
-    // Serial1.print(roll_input);Serial1.print("\t");
-    // Serial1.print(target_roll);Serial1.print("\t");
-    // Serial1.print(pitch_input);Serial1.print("\t");
-    // Serial1.print(target_pitch);Serial1.print("\t");
-    // Serial1.print(PID_virtual_pos);Serial1.print("\t");
-    // Serial1.print(gps_sats);Serial1.print("\t");
-    // Serial1.print(gps_speed);Serial1.print("\t");
-    // Serial1.print(distance_cm);Serial1.print("\t");
+    // Serial1.print(roll_channel);Serial1.print("\t");
+    // Serial1.print(pitch_channel);Serial1.print("\t");
+    // Serial1.print(yaw_channel);Serial1.print("\t");
+    // Serial1.print(yaw_reference);Serial1.print("\t");
+    // Serial1.print(set_yaw);Serial1.print("\t");
+    // Serial1.print(yaw_control);Serial1.print("\t");
+    // Serial1.print(PID_virtual_yaw);Serial1.print("\t");
+    // Serial1.print(PID_value_yaw);Serial1.print("\t");
+    // Serial1.print(yaw_input);Serial1.print("\t");
     // Serial1.print(gx);Serial1.print("\t");
     // Serial1.print(gy);Serial1.print("\t");
     // Serial1.print(gz);Serial1.print("\t");
@@ -31,8 +31,8 @@ void print_out() {
 //   Serial1.print(yaw_deg)      ;Serial1.print("\t");
 //   Serial1.print(fixedHeadingDegrees)      ;Serial1.print("\t");
 //   Serial1.print(z_position)      ;Serial1.print("\t");
-  // Serial1.print(gps_lat,7)      ;Serial1.print("\t");
-  // Serial1.print(gps_lon,7)      ;Serial1.print("\t");
+//   Serial1.print(gps_lat,7)      ;Serial1.print("\t");
+//   Serial1.print(gps_lon,7)      ;Serial1.print("\t");
 // }
 
 // void motor_output(){
@@ -72,7 +72,7 @@ void print_out() {
 //     Serial1.print(servoAngleInitB)  ;Serial1.print("\t");
 //   }
 void atitude_data() {
-   Serial1.print("roll:"); Serial1.print(roll_deg); Serial1.print(",");  //sintaks nampilin ke GCS
+  Serial1.print("roll:"); Serial1.print(roll_deg); Serial1.print(",");  //sintaks nampilin ke GCS
   Serial1.print("pitch:"); Serial1.print(pitch_deg); Serial1.print(",");
   Serial1.print("yaw:"); Serial1.print(yaw_deg); Serial1.print(",");
   Serial1.print("height:"); Serial1.print(z_position); Serial1.print(",");

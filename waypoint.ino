@@ -15,7 +15,7 @@
 //     waypointTime_current = millis();
 //     if(waypointTime_current - waypointTime_previous >= 20){ checkBearing(); waypointTime_previous = millis();}
     
-//     yawControlServo   = (yaw_input + heading_control*trim_yaw); yawControlServo = constrain(yawControlServo, -10, 10);
+//     // yawControlServo   = (yaw_input + heading_control*trim_yaw); yawControlServo = constrain(yawControlServo, -10, 10);
 //     if(setHeading == bearing )
 //     {
 //       if(cek_heading == 0)
@@ -30,27 +30,28 @@
 
 //    if(tracking == 1)
 //    {
-//     lat1  = lattitude;
-//     long1 = longtitude;
+//     lat1  = gps_lat;
+//     long1 = gps_lon;
 //     lat2  = WaypointLatitude[waypoint_index]; 
 //     long2 = WaypointLongitude[waypoint_index];
 
 //      BearingCalculation();
 //      setHeading = bearing;
     
-//     yawControlServo   = (yaw_input + heading_control*trim_yaw); yawControlServo = constrain(yawControlServo, -3, 3);
+//     // yawControlServo   = (yaw_input + heading_control*trim_yaw); yawControlServo = constrain(yawControlServo, -3, 3);
     
-//     if(((lat1 > lat2 - 0.00008) && (lat1 < lat2 + 0.00008))&&((long1 > long2 - 0.00008) && (long1 < long2 + 0.00008)))
+//     if(((lat1 > lat2 - 0.00005) && (lat1 < lat2 + 0.00005))&&((long1 > long2 - 0.00005) && (long1 < long2 + 0.00005)))
 //     {
 //       waypoint = 1;
 //     }
-//     if(waypoint == 1){ tracking = 0; init_Home = 1; waypoint_index++; latitude_init = lattitude; longitude_init = longtitude; cek_heading = 0; if(waypoint_index>(waypointCount-1)){tracking =2;}}
+//     if(waypoint == 1){ tracking = 0; init_Home = 1; waypoint_index++; latitude_init = gps_lat; longitude_init = gps_lon; cek_heading = 0; if(waypoint_index>(waypointCount-1)){tracking =2;}}
 //    }
 
 //    if(tracking == 2)
 //    {
-//      throttle = throttle_channel;
-//      yawControlServo = (yaw_input + heading_control*trim_yaw) + (gyroZ_filt*gain_vel_yaw); yawControlServo = constrain(yawControlServo, -30, 30);
+//     //  throttle = throttle_channel;
+//     //  yawControlServo = (yaw_input + heading_control*trim_yaw) + (gyroZ_filt*gain_vel_yaw); yawControlServo = constrain(yawControlServo, -30, 30);
+//     // kembali hover
 //    }
 // }
 

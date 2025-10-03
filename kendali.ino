@@ -2,7 +2,7 @@ void controlDrone(){
   currentTime_pid=millis();
   if(currentTime_pid-previousTime_pid>9){
   dt=(currentTime_pid-previousTime_pid);
-//==============================++++++++++++++++++++++++++++++++++++++++++++======================Virtual PID==============================================================
+//====================================================Virtual PID==============================================================
   if(ch6!=0){roll_input=pitch_input=yaw_input=0;}
   error_roll1=(roll_input+target_roll)-roll_deg;
   error_pitch1=(pitch_input*-1+target_pitch*-1)-pitch_deg;
@@ -109,9 +109,15 @@ void controlDrone(){
 //      if(head_mode == 0){
 //        throttle=  thrchaottle_nnel;
 //      }
-       pulse_length_esc1 = throttle_channel + (pitchControl) + (rollControl) + (altControl); 
-       pulse_length_esc3 = throttle_channel - (pitchControl) + (altControl); 
-       pulse_length_esc2 = throttle_channel + (pitchControl) - (rollControl) + (altControl);
+
+  // if(ch5 == 1 && head_mode == 0){ altitudeControl_ref = altitude_m;}
+  // if(ch5 == 1 && head_mode == 1){ alt_input =  altitudeControl_ref;}
+  // if(ch7 == 0 && ch5 == 1 && ch6 ==0) {latitude_init = gps_lat; longitude_init = gps_lon; init_Home = 0; waypoint_index = 0; tracking = 0; cek_heading = 0; bearing = 0;}
+  // if(ch7 == 1 && ch5 ==1 && ch6 ==1){waypointMission();}
+
+       pulse_length_esc1 = throttle_channel + (pitchControl) + (rollControl) + pulse_escx; 
+       pulse_length_esc3 = throttle_channel - (pitchControl); 
+       pulse_length_esc2 = throttle_channel + (pitchControl) - (rollControl) + pulse_escy;
        pulse_length_servo1 = (yawControl*1);
        pulse_length_servo2 = (yawControl*1);
 
@@ -182,11 +188,6 @@ void controlPlane(){
   rollControl2  = PID_value_roll2;
   pitchControl2 = PID_value_pitch2;
   altControl2 = PID_virtual_alt2;
-
-  if(ch5 == 1 && head_mode == 0){ altitudeControl_ref = altitude_m;}
-  if(ch5 == 1 && head_mode == 1){ alt_input =  altitudeControl_ref;}
-  if(ch7 == 0 && ch5 == 1) {throttle = throttle_channel; latitude_init = gps_lat; longitude_init = gps_lon; 
-                                        init_Home = 0; waypoint_index = 0; tracking = 0; cek_heading = 0; bearing = 0;}
 
   rollControl2    = constrain(rollControl2, -30, 30);
   pitchControl2   = constrain(pitchControl2, -30, 30);

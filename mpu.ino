@@ -18,12 +18,12 @@ void init_MPU() {
     devStatus = mpu.dmpInitialize();
 
     // Set offset hasil kalibrasi (ganti dengan hasilmu)
-    mpu.setXGyroOffset(-76);
-    mpu.setYGyroOffset(384);
-    mpu.setZGyroOffset(-42);
-    mpu.setXAccelOffset(357);
-    mpu.setYAccelOffset(-2485);
-    mpu.setZAccelOffset(517);
+    mpu.setXGyroOffset(-69);
+    mpu.setYGyroOffset(-74);
+    mpu.setZGyroOffset(17);
+    mpu.setXAccelOffset(50);
+    mpu.setYAccelOffset(1332);
+    mpu.setZAccelOffset(1950);
 
     if (devStatus == 0) {
         // Enable DMP
@@ -53,7 +53,7 @@ void init_MPU() {
 
 // ==== Ambil YPR & gyro ====
 void get_YPR() {
-  mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+  // mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
     if (!mpuInterrupt) return;   // tidak ada data baru, keluar saja
     mpuInterrupt = false;
 
@@ -83,18 +83,17 @@ void get_YPR() {
     roll_deg  = ypr[2] * 180.0f / M_PI;
     yaw_deg   = ypr[0] * 180.0f / M_PI;
     if (yaw_deg < 0) yaw_deg += 360.0f;
-    yaw_reference = set_yaw - yaw_deg;
-    if(yaw_reference >   180) { yaw_reference -= 360;}
-    if(yaw_reference < - 180) { yaw_reference += 360;}
-    yaw_control = yaw_reference;
-    
-    yawPrev = yaw_deg;
+    // yaw_reference = set_yaw - yaw_deg;
+    // if(yaw_reference >   180) { yaw_reference -= 360;}
+    // if(yaw_reference < - 180) { yaw_reference += 360;}
+    // yaw_control = yaw_reference;   
+    // yawPrev = yaw_deg;
 
-    if(yaw_channel <= 1450 || yaw_channel >= 1550|| ch5==0 || ch6 == 2)set_yaw = yaw_deg;
+    // if(yaw_channel <= 1450 || yaw_channel >= 1550|| ch5==0 || ch6 == 2)set_yaw = yaw_deg;
 
     // ambil gyro mentah → dps
     mpu.getRotation(&gx, &gy, &gz);
     gx = gx / 16.4f; // ±250 dps scale
-    gy = (gy / 16.4f)-9;
+    gy = (gy / 16.4f);
     gz = gz / 16.4f;
 }

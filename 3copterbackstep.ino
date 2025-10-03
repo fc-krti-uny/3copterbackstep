@@ -27,7 +27,7 @@
 // Konstanta radius bumi dalam meter
 #define EARTH_RADIUS_M 6371000.0
 
-
+TwoWire Wire2(PB11,PB10);
 //================================================= ELRS ======================================
 CRSFforArduino *crsf = nullptr;
 HardwareSerial Serial6(PD6,PD5); // define serial pin in this section
@@ -47,11 +47,11 @@ float G_Dt           = 0.005;
 //----------------------Tuning Drone------------------------------------------
 
 float Kp_roll       = 4.5;              float Kp_roll2  = 2;
-float Ki_roll       = 0.35;              float Ki_roll2  = 0;
+float Ki_roll       = 0.35;              float Ki_roll2  = 0;//0.35
 float Kd_roll       = 0.9;                float Kd_roll2  = 0;
 
 float Kp_pitch      = 3.7;                float Kp_pitch2 = 1.85;
-float Ki_pitch      = 0.47;              float Ki_pitch2 = 0;
+float Ki_pitch      = 0.47;              float Ki_pitch2 = 0;//0.47
 float Kd_pitch      = 0;                float Kd_pitch2 = 0;
 
 float Kp_yaw        = 1;                float Kp_yaw2   = 0.5;
@@ -175,6 +175,8 @@ volatile int ch9_channel      = 0;
 int ch5, ch6, ch7, ch8, ch9, throttle, pst_mode, alt_mode,head_mode,head_mode1, statusmode;
 int transisi = 0;
 int armStatus = 0;
+int pulse_escx=0;
+int pulse_escy=0; 
 int pulse_esc1=0;
 int pulse_esc2=0; 
 int pulse_esc3 =0; 
@@ -219,18 +221,22 @@ int servo2_down = 130;
 
 int servo1_up1   = 50;
 int servo1_down1 = 130;
-int servo2_up1   = 57;
-int servo2_down1 = 137;
+int servo2_up1   = 63;
+int servo2_down1 = 143;
 
 int pulse_length_servo1, pulse_length_servo2;
 int Servo1, Servo2;
 float rollControlServo, pitchControlServo, yawControlServo;
 
 //=============================================BAROMETER==========================================================================---- 
-TwoWire Wire2(PB11,PB10);
-// Adafruit_BMP280 bmp; // I2C
-Adafruit_BMP280 bmp(&Wire2); // hardware SPI
-//Adafruit_BMP280 bmp(BMP_CS, BMP_MOSI, BMP_MISO,  BMP_SCK);
+
+uint16_t C[7];
+uint8_t barometer_counter, temperature_counter, average_temperature_mem_location, start;
+int64_t OFF, OFF_C2, SENS, SENS_C1, P;
+uint32_t raw_pressure, raw_temperature, temp, raw_temperature_rotating_memory[6], raw_average_temperature_total;
+float actual_pressure, actual_pressure_slow, actual_pressure_fast, actual_pressure_diff;
+float ground_pressure, altutude_hold_pressure;
+int32_t dT, dT_C5;
 
 
 float altitude_m;
@@ -253,34 +259,37 @@ uint8_t MS5611_address = 0x77;             //The I2C address of the MS5611 barom
   unsigned long lastTime = millis();
   float lastRate = 0;
 
-float AltitudeBaroGround,z_position,alt_ref,estimation_altitude,altitudeControl_ref;
+float AltitudeBaroGround,z_position,alt_ref,estimation_altitude;
 int axis;
 // ======================================================== COMPAS ======================================================================
-// // Alamat I2C untuk sensor IST8310
-// const int IST8310_I2C_ADDR = 0x0E;
+// Alamat I2C untuk sensor IST8310
+const int IST8310_I2C_ADDR = 0x0E;
 
-// // Alamat Register
-// const int WAI_REG = 0x00;        // Register "Who Am I"
-// const int DEVICE_ID = 0x10;      // Nilai yang diharapkan dari WAI_REG
+// Alamat Register
+const int WAI_REG = 0x00;        // Register "Who Am I"
+const int DEVICE_ID = 0x10;      // Nilai yang diharapkan dari WAI_REG
 
-// const int OUTPUT_X_L_REG = 0x03; // Data LSB X
-// const int OUTPUT_X_H_REG = 0x04; // Data MSB X
-// const int OUTPUT_Y_L_REG = 0x05; // Data LSB Y
-// const int OUTPUT_Y_H_REG = 0x06; // Data MSB Y
-// const int OUTPUT_Z_L_REG = 0x07; // Data LSB Z
-// const int OUTPUT_Z_H_REG = 0x08; // Data MSB Z
+const int OUTPUT_X_L_REG = 0x03; // Data LSB X
+const int OUTPUT_X_H_REG = 0x04; // Data MSB X
+const int OUTPUT_Y_L_REG = 0x05; // Data LSB Y
+const int OUTPUT_Y_H_REG = 0x06; // Data MSB Y
+const int OUTPUT_Z_L_REG = 0x07; // Data LSB Z
+const int OUTPUT_Z_H_REG = 0x08; // Data MSB Z
 
-// const int CNTL1_REG = 0x0A;      // Register Kontrol 1
-// const int CNTL2_REG = 0x0B;      // Register Kontrol 2
+const int CNTL1_REG = 0x0A;      // Register Kontrol 1
+const int CNTL2_REG = 0x0B;      // Register Kontrol 2
 
-// const int AVGCNTL_REG = 0x41;    // Register untuk Averaging
+const int AVGCNTL_REG = 0x41;    // Register untuk Averaging
 
-HMC5883L compass;
+// HMC5883L compass;
 float headingDegrees,heading;
 float fixedHeadingDegrees;
 float compensateRoll, compensatePitch;
 float cosComRoll, sinComRoll, cosComPitch, sinComPitch;
 float Yh, Xh, Ymag_correct, Xmag_correct;
+float setHeading;
+float heading_reference,heading_control;
+int head = 0;
 
 //=============================================== GPS ================================================
 // Konstanta radius bumi dalam meter
@@ -300,7 +309,7 @@ int fwhead1;
 double prevLat = 0, prevLon = 0;
 unsigned long prevMillis = 0;
 double gps_lat,gps_lon,gps_sats;
-double jarak,waktu;
+double jarak,waktu,alt_m;
 
 // Pastikan tidak ada padding byte pada struct (offset harus persis)
 #pragma pack(push, 1)
@@ -369,8 +378,8 @@ float dLon, brlat1, brlat2, a1bearing, a2bearing, bearing, bearingHeading;
 float lat1, lat2, long1, long2;
 float latitude_init, longitude_init;
 
-float WaypointLatitude[1]  = {-4.6112782};  
-float WaypointLongitude[1] = {105.2349140}; 
+float WaypointLatitude[1]  = {-7.752695};  
+float WaypointLongitude[1] = {110.209059}; 
 //float WaypointLatitude[3]  = {-7.751326,-7.750563,-7.750566  }; 
 //float WaypointLongitude[3] = {110.348207,110.348688, 110.349594}; 
 int waypointCount = 1;
@@ -402,6 +411,8 @@ void setup() {
   Wire.setSDA(PB9);
   Wire.setSCL(PB8);
   Wire.begin();
+  Wire2.begin();
+  // Wire2.begin();
   Wire.setClock(400000); // 400kHz I2C clock. Comment this line if having compilation difficulties
   #elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
   Fastwire::setup(400, true);
@@ -411,7 +422,7 @@ void setup() {
   init_MPU();
   elrsinit();
   motor_setup();
-  baro_initialized();
+  // baro_initialized();
   compass_init();
   init_gps();
   // Serial2.setRxBufferSize(512); // kalau core STM32 support
@@ -430,7 +441,7 @@ void loop() {
   update_motor();
      
   update_gps();
-  updateBaro();
+  // updateBaro();
     // printgcs();
     // outputCompass();
   timeProgram = micros();
