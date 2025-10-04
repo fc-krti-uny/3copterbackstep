@@ -2,8 +2,14 @@
 #include "MPU6050_6Axis_MotionApps20.h"
 #include <HardwareSerial.h>
 
+//OSD
+#include <SPI.h>
+#include <max7456.h>
+#define redLed 3
+#define greenLed 4
+
 //BAROMETER
-#include <Adafruit_BMP280.h>
+#include "MS5611.h"
 #include <KalmanFilter.h>
 #include <AQMath.h>
 #include <MatrixMath.h>
@@ -33,6 +39,9 @@ CRSFforArduino *crsf = nullptr;
 HardwareSerial Serial6(PD6,PD5); // define serial pin in this section
 int rcChannelCount = crsfProtocol::RC_CHANNEL_COUNT;
 void onReceiveRcChannels(serialReceiverLayer::rcChannels_t *rcChannels); // is it important?
+
+//================================================= BATERAI ======================================
+float vin, vout, adc;
 
 //================================================ IMU ==========================================
 MPU6050 mpu;
@@ -404,7 +413,7 @@ uint32_t timeServo, previousTimeServo;
 
 HardwareSerial Serial1(PA1,PA0);
 //==================================================================================================================================================
-int vout = 23;
+// int vout = 23;
 void setup() {
   Serial1.begin(57600);
   #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
@@ -422,9 +431,10 @@ void setup() {
   init_MPU();
   elrsinit();
   motor_setup();
-  // baro_initialized();
+  baro_initialized();
   compass_init();
   init_gps();
+  osd_init();
   // Serial2.setRxBufferSize(512); // kalau core STM32 support
 }
 
@@ -439,11 +449,12 @@ void loop() {
   mapremote();
   SerialEvent();
   update_motor();
-     
   update_gps();
+  osd_baca();
+  bacaBaro();
   // updateBaro();
-    // printgcs();
-    // outputCompass();
+  // printgcs();
+  // outputCompass();
   timeProgram = micros();
   if (timeProgram - previousTimeProgram >= 100000)
   {

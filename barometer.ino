@@ -1,18 +1,41 @@
-void baro_initialized(){
-  Wire.beginTransmission(MS5611_address);                        //Start communication with the MS5611.
-    //For calculating the pressure the 6 calibration values need to be polled from the MS5611.
-    //These 2 byte values are stored in the memory location 0xA2 and up.
-    for (start = 1; start <= 6; start++) {
-      Wire.beginTransmission(MS5611_address);                    //Start communication with the MPU-6050.
-      Wire.write(0xA0 + start * 2);                              //Send the address that we want to read.
-      Wire.endTransmission();                                    //End the transmission.
+MS5611 MS5611;
 
-      Wire.requestFrom(MS5611_address, 2);                       //Request 2 bytes from the MS5611.
-      C[start] = Wire.read() << 8 | Wire.read();                //Add the low and high byte to the C[x] calibration variable.
-    }
+
+void baro_initialized() {
+  // Serial1.begin(9600);
+  while (!Serial1);
+
+  Serial1.println();
+  Serial1.println(__FILE__);
+  Serial1.print("MS5611_LIB_VERSION: ");
+  Serial1.println(MS5611_LIB_VERSION);
+  Serial1.println();
+
+  if (MS5611.begin() == true) {
+    Serial1.print("MS5611 found: ");
+    Serial1.println(MS5611.getAddress());
+  } else {
+    Serial1.println("MS5611 not found. halt.");
+    while (1);  // stop program
+  }
+
+  Serial1.println();
+  Serial1.println("Celsius\tmBar\tMeter\tFeet");
 }
 
-float getAltitudeDerivative(){
+
+void bacaBaro() {
+  MS5611.read(); // membaca sensor
+  // Serial1.print(MS5611.getTemperature(), 2);
+  // Serial1.print('\t');
+  // Serial1.print(MS5611.getPressure(), 2);
+  // Serial1.print('\t');
+  //  Serial1.print("height:"); Serial1.print(MS5611.getAltitude(), 2);
+  // Serial1.print('\t');
+  // Serial1.println(MS5611.getAltitudeFeet(), 2);
+}
+
+float getAltitudeDerivative() {
   unsigned long currentTime = millis();
   float deltaTime = (currentTime - lastTime) / 1000.0;
   float currentAltitude = altitude_cm;
@@ -22,6 +45,7 @@ float getAltitudeDerivative(){
   lastRate = rate;
   return rate;
 }
+
 
 void updateBaro() {
   barometer_counter ++;
