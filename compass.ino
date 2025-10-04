@@ -15,7 +15,7 @@ void compass_init()
   // 2. Verifikasi identitas sensor dengan membaca register "Who Am I"
   Wire2.beginTransmission(IST8310_I2C_ADDR);
   Wire2.write(WAI_REG);
-  Wire2.endTransmission();
+  Wire2.endTransmission();//lllll
   
   Wire2.requestFrom(IST8310_I2C_ADDR, 1);
   if (Wire2.available()) {
