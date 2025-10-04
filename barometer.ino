@@ -11,7 +11,7 @@ void baro_initialized(){
       C[start] = Wire.read() << 8 | Wire.read();                //Add the low and high byte to the C[x] calibration variable.
     }
 }
-
+//ll
 float getAltitudeDerivative(){
   unsigned long currentTime = millis();
   float deltaTime = (currentTime - lastTime) / 1000.0;
