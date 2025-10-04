@@ -18,7 +18,7 @@ void compass_init()
   Wire.write(WAI_REG);
   Wire.endTransmission();
   
-  Wire.requestFrom(IST8310_I2C_ADDR, 1);
+  Wire.requestFrom(IST8310_I2C_ADDR, 1);//ohou
   if (Wire.available()) {
     byte deviceId = Wire.read();
     if (deviceId == DEVICE_ID) {
