@@ -25,25 +25,26 @@ void print_out() {
   }
 }
 
-// void atitude_data() {
-//   Serial1.print(roll_deg)      ;Serial1.print("\t");
-//   Serial1.print(pitch_deg)      ;Serial1.print("\t");
-//   Serial1.print(yaw_deg)      ;Serial1.print("\t");
-//   Serial1.print(fixedHeadingDegrees)      ;Serial1.print("\t");
-//   Serial1.print(z_position)      ;Serial1.print("\t");
-//   Serial1.print(gps_lat,7)      ;Serial1.print("\t");
-//   Serial1.print(gps_lon,7)      ;Serial1.print("\t");
-// }
+void atitude_data() {
+  Serial1.print(roll_deg)      ;Serial1.print("\t");
+  Serial1.print(pitch_deg)      ;Serial1.print("\t");
+  Serial1.print(yaw_deg)      ;Serial1.print("\t");
+  Serial1.print(fixedHeadingDegrees)      ;Serial1.print("\t");
+  Serial1.print(altitude_m)      ;Serial1.print("\t");
+  Serial1.print(z_position)      ;Serial1.print("\t");
+  Serial1.print(gps_lat,7)      ;Serial1.print("\t");
+  Serial1.print(gps_lon,7)      ;Serial1.print("\t");
+}
 
-// void motor_output(){
-//   Serial1.print(pulse_length_esc1)      ;Serial1.print("\t");
-//   Serial1.print(pulse_length_esc2)      ;Serial1.print("\t");
-//   Serial1.print(pulse_length_esc3)      ;Serial1.print("\t");
-//   Serial1.print(pulse_length_servo1)      ;Serial1.print("\t");
-//   Serial1.print(pulse_length_servo2)      ;Serial1.print("\t");
-//   Serial1.print(Servo1)      ;Serial1.print("\t");
-//   Serial1.print(Servo2)      ;Serial1.print("\t");
-// }
+void motor_output(){
+  Serial1.print(pulse_length_esc1)      ;Serial1.print("\t");
+  Serial1.print(pulse_length_esc2)      ;Serial1.print("\t");
+  Serial1.print(pulse_length_esc3)      ;Serial1.print("\t");
+  Serial1.print(pulse_length_servo1)      ;Serial1.print("\t");
+  Serial1.print(pulse_length_servo2)      ;Serial1.print("\t");
+  Serial1.print(Servo1)      ;Serial1.print("\t");
+  Serial1.print(Servo2)      ;Serial1.print("\t");
+}
 
 // void gainTuningFeedback()
 // {
@@ -71,25 +72,25 @@ void print_out() {
 //     Serial1.print(servoAngleInitA)  ;Serial1.print("\t");
 //     Serial1.print(servoAngleInitB)  ;Serial1.print("\t");
 //   }
-void atitude_data() {
-  Serial1.print("roll:"); Serial1.print(roll_deg); Serial1.print(",");  //sintaks nampilin ke GCS
-  Serial1.print("pitch:"); Serial1.print(pitch_deg); Serial1.print(",");
-  Serial1.print("yaw:"); Serial1.print(yaw_deg); Serial1.print(",");
-  Serial1.print("height:"); Serial1.print(z_position); Serial1.print(",");
-  Serial1.print("batteryvolt:"); Serial1.print(vout); Serial1.print(",");  //baca volt  batre
-  Serial1.print("compass:"); Serial1.print(fixedHeadingDegrees) ;Serial1.print(",");
-  Serial1.print("Lat:"); Serial1.print(gps_lat, 7); Serial1.print(",");
-  Serial1.print("Lon:"); Serial1.print(gps_lon, 7); Serial1.print(",");
-  // Serial1.print(gps_lat,7)      ;Serial1.print("\t");
-  // Serial1.print(gps_lon,7)      ;Serial1.print("\t");
-}
+// void atitude_data() {
+//   Serial1.print("roll:"); Serial1.print(roll_deg); Serial1.print(",");  //sintaks nampilin ke GCS
+//   Serial1.print("pitch:"); Serial1.print(pitch_deg); Serial1.print(",");
+//   Serial1.print("yaw:"); Serial1.print(yaw_deg); Serial1.print(",");
+//   Serial1.print("height:"); Serial1.print(z_position); Serial1.print(",");
+//   Serial1.print("batteryvolt:"); Serial1.print(vout); Serial1.print(",");  //baca volt  batre
+//   Serial1.print("compass:"); Serial1.print(fixedHeadingDegrees) ;Serial1.print(",");
+//   Serial1.print("Lat:"); Serial1.print(gps_lat, 7); Serial1.print(",");
+//   Serial1.print("Lon:"); Serial1.print(gps_lon, 7); Serial1.print(",");
+//   // Serial1.print(gps_lat,7)      ;Serial1.print("\t");
+//   // Serial1.print(gps_lon,7)      ;Serial1.print("\t");
+// }
 
-void motor_output(){
- Serial1.print("esc1:");  Serial1.print(pulse_length_esc1)      ;Serial1.print(",");
-  Serial1.print("esc2:");  Serial1.print(pulse_length_esc2)      ;Serial1.print(",");
-  Serial1.print("esc3:");  Serial1.print(pulse_length_esc3)      ;Serial1.print(",");
-  // Serial1.print(pulse_length_servo1)      ;Serial1.print("\t");
-  // Serial1.print(pulse_length_servo2)      ;Serial1.print("\t");
-  // Serial1.print(Servo1)      ;Serial1.print("\t");
-  // Serial1.print(Servo2)      ;Serial1.print("\t");
-}
+// void motor_output(){
+//  Serial1.print("esc1:");  Serial1.print(pulse_length_esc1)      ;Serial1.print(",");
+//   Serial1.print("esc2:");  Serial1.print(pulse_length_esc2)      ;Serial1.print(",");
+//   Serial1.print("esc3:");  Serial1.print(pulse_length_esc3)      ;Serial1.print(",");
+//   // Serial1.print(pulse_length_servo1)      ;Serial1.print("\t");
+//   // Serial1.print(pulse_length_servo2)      ;Serial1.print("\t");
+//   // Serial1.print(Servo1)      ;Serial1.print("\t");
+//   // Serial1.print(Servo2)      ;Serial1.print("\t");
+// }

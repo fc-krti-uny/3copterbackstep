@@ -38,6 +38,7 @@ void compass_init()
   Wire2.write(0x24); // Mengatur rata-rata 16x untuk Y dan 16x untuk XZ
   Wire2.endTransmission();
 
+
   Serial1.println("Inisialisasi selesai. Memulai pembacaan data...");
   Serial1.println("-------------------------------------------------");
 }
@@ -78,8 +79,10 @@ void compass_update()
     // Negasikan nilai Z untuk menyesuaikan dengan konvensi navigasi 'right-hand rule'
     rawZ = -rawZ;
 
+    float calibratedX = ((rawX - x_offset) * x_scale);
+    float calibratedY = ((rawY - y_offset) * y_scale);
   // Calculate heading
-  float heading = atan2(rawY, rawX);
+  float heading = atan2(calibratedY, calibratedX);
 
   // Set declination angle on your location and fix heading
   // You can find your declination on: http://magnetic-declination.com/

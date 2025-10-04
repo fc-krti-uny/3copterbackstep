@@ -58,5 +58,5 @@ void osd_baca() {
   osd.print(int(counter / 60), 10, 6, 2, 0, false, true);
   osd.print(int(counter % 60), 13, 6, 2, 0, false, true);
 
-  delay(100);
+  // delay(100);
 }

@@ -299,7 +299,10 @@ float Yh, Xh, Ymag_correct, Xmag_correct;
 float setHeading;
 float heading_reference,heading_control;
 int head = 0;
-
+const float x_offset = -2; 
+const float y_offset = 32;
+const float x_scale  = 1;
+const float y_scale  = 1;
 //=============================================== GPS ================================================
 // Konstanta radius bumi dalam meter
 #define EARTH_RADIUS_M 6371000.0
@@ -439,11 +442,11 @@ void setup() {
 }
 
 void loop() {
-  static uint32_t lastIMU=0;
-  if (millis()-lastIMU >= 20) {  // 50 Hz
-    lastIMU = millis();
+  // static uint32_t lastIMU=0;
+  // if (millis()-lastIMU >= 20) {  // 50 Hz
+  //   lastIMU = millis();
 
-  }
+  // }
   get_YPR();
   compass_update();
   mapremote();
@@ -451,8 +454,7 @@ void loop() {
   update_motor();
   update_gps();
   osd_baca();
-  bacaBaro();
-  // updateBaro();
+  updateBaro();
   // printgcs();
   // outputCompass();
   timeProgram = micros();
