@@ -10,10 +10,10 @@ void controlDrone(){
   error_alt1=alt_input-altitude_m;
   error_pos=0-distance_cm;
 
-  integral_error_roll1+=error_roll1*0.01;     integral_error_roll1 = constrain(integral_error_roll1, -200, 200);
-  integral_error_pitch1+=error_pitch1*0.01;   integral_error_pitch1 = constrain(integral_error_pitch1, -200, 200); 
-  integral_error_yaw1+=error_yaw1*0.01;       integral_error_yaw1 = constrain(integral_error_yaw1, -200, 200);
-  integral_error_alt1+=error_alt1*0.01;       integral_error_alt1 = constrain(integral_error_alt1, -200, 200);
+  integral_error_roll1+=error_roll1*0.01;     integral_error_roll1 = constrain(integral_error_roll1, -100, 100);
+  integral_error_pitch1+=error_pitch1*0.01;   integral_error_pitch1 = constrain(integral_error_pitch1, -100, 100); 
+  integral_error_yaw1+=error_yaw1*0.01;       integral_error_yaw1 = constrain(integral_error_yaw1, -100, 100);
+  integral_error_alt1+=error_alt1*0.01;       integral_error_alt1 = constrain(integral_error_alt1, -100, 100);
   integral_error_pos+=error_pos*0.01;
 
   derivative_error_roll1=(error_roll1-last_error_roll1)/0.01;
@@ -72,28 +72,28 @@ void controlDrone(){
 
 //     if(ch7 == 0 && ch5 == 1 && ch6 == 0) {latitude_init = latitude; longitude_init = longitude; latitude_home = latitude; longitude_home = longitude; init_Home = 0; waypoint_index = 0; tracking = 0; cek_heading = 0; bearing = 0;pitch_on = 0;pitch_off = 0;}
 //     if(((ch7  == 1 && head_mode == 1 && ch5 == 1 && ch6 == 0)||darurat == 1)) {waypointMission();}
-    // if(ch5 == 1 && (head_mode ==0 || alt_mode==0)){ altitudeControl_ref = altitude_cm;}
-    // if(ch5 == 1 && head_mode ==1 && alt_mode==1){ alt_input =  altitudeControl_ref;}
-    if(ch5 == 1 && (head_mode ==0 || pst_mode==0)){
-      mode_baru_aktif = true;
-      target_pitch=target_roll=0;
-    }
-    if(ch5 == 1 && head_mode ==1 && pst_mode==1){
-        if (mode_baru_aktif) {
-            target_lat = gps_lat;
-            target_lon = gps_lon;
-            error_pos=error_vel=integral_error_pos=integral_error_vel=derivative_error_pos=derivative_error_vel=last_error_pos=last_error_vel=0;
-            mode_baru_aktif = false;
-        }
-        double distance_cm_fast = calculate_distance_cm(gps_lat, gps_lon, target_lat, target_lon);
-        distance_cm = distance_cm_fast * (float)0.8 + distance_cm_fast * (float)0.2;
-        bearing_deg = calculate_bearing_deg(gps_lat, gps_lon, target_lat, target_lon);
-        current_heading = fixedHeadingDegrees; //compass.heading_deg();
-        angle_to_target = bearing_deg - current_heading;
-        target_pitch = PID_value_vel * cos(radians(angle_to_target)) *-1;
-        if(target_pitch >= 0){target_pitch = target_pitch;} else if(target_pitch < 0){target_pitch /= 2;}
-        target_roll = PID_value_vel * sin(radians(angle_to_target)) *-1;
-    }
+    if(ch5 == 1 && head_mode ==0){ altitudeControl_ref = altitude_m;}
+    if(ch5 == 1 && head_mode ==1){ alt_input =  altitudeControl_ref;}
+    // if(ch5 == 1 && (head_mode ==0 || pst_mode==0)){
+    //   mode_baru_aktif = true;
+    //   target_pitch=target_roll=0;
+    // }
+    // if(ch5 == 1 && head_mode ==1 && pst_mode==1){
+    //     if (mode_baru_aktif) {
+    //         target_lat = gps_lat;
+    //         target_lon = gps_lon;
+    //         error_pos=error_vel=integral_error_pos=integral_error_vel=derivative_error_pos=derivative_error_vel=last_error_pos=last_error_vel=0;
+    //         mode_baru_aktif = false;
+    //     }
+    //     double distance_cm_fast = calculate_distance_cm(gps_lat, gps_lon, target_lat, target_lon);
+    //     distance_cm = distance_cm_fast * (float)0.8 + distance_cm_fast * (float)0.2;
+    //     bearing_deg = calculate_bearing_deg(gps_lat, gps_lon, target_lat, target_lon);
+    //     current_heading = fixedHeadingDegrees; //compass.heading_deg();
+    //     angle_to_target = bearing_deg - current_heading;
+    //     target_pitch = PID_value_vel * cos(radians(angle_to_target)) *-1;
+    //     if(target_pitch >= 0){target_pitch = target_pitch;} else if(target_pitch < 0){target_pitch /= 2;}
+    //     target_roll = PID_value_vel * sin(radians(angle_to_target)) *-1;
+    // }
 
 
        yawControl   = constrain(yawControl, -30, 30);
@@ -110,14 +110,14 @@ void controlDrone(){
 //        throttle=  thrchaottle_nnel;
 //      }
 
-  // if(ch5 == 1 && head_mode == 0){ altitudeControl_ref = altitude_m;}
-  // if(ch5 == 1 && head_mode == 1){ alt_input =  altitudeControl_ref;}
+  if(ch5 == 1 && head_mode == 0){ altitudeControl_ref = altitude_m;alt_input = altitude_m;}
+  if(ch5 == 1 && head_mode == 1){ alt_input =  altitudeControl_ref;}
   // if(ch7 == 0 && ch5 == 1 && ch6 ==0) {latitude_init = gps_lat; longitude_init = gps_lon; init_Home = 0; waypoint_index = 0; tracking = 0; cek_heading = 0; bearing = 0;}
   // if(ch7 == 1 && ch5 ==1 && ch6 ==1){waypointMission();}
 
-       pulse_length_esc1 = throttle_channel + (pitchControl) + (rollControl) + pulse_escx; 
-       pulse_length_esc3 = throttle_channel - (pitchControl); 
-       pulse_length_esc2 = throttle_channel + (pitchControl) - (rollControl) + pulse_escy;
+       pulse_length_esc1 = throttle_channel + (pitchControl) + (rollControl) + altControl + pulse_escx; 
+       pulse_length_esc3 = throttle_channel - (pitchControl) + altControl; 
+       pulse_length_esc2 = throttle_channel + (pitchControl) - (rollControl) + altControl + pulse_escy;
        pulse_length_servo1 = (yawControl*1);
        pulse_length_servo2 = (yawControl*1);
 
@@ -137,7 +137,7 @@ void controlDrone(){
 
 void controlPlane(){
   if(ch6==0){roll_input1=pitch_input1=yaw_input1=0;}
-  if(ch7==1){
+  if(ch8==1){
   currentTime_pid=millis();
   if(currentTime_pid-previousTime_pid>9){
   dt=(currentTime_pid-previousTime_pid);
@@ -196,7 +196,7 @@ void controlPlane(){
   Servo1 = (rollControl2) - (pitchControl2*1) + altControl2; Servo1 = constrain(Servo1, -40,40); Servo1 = map(Servo1,-40,40,servo1_down1,servo1_up1); 
   Servo2 = (rollControl2) + (pitchControl2*1) + altControl2; Servo2 = constrain(Servo2, -40,40); Servo2 = map(Servo2,-40,40,servo2_down1,servo2_up1); 
  }
-  if(ch7==0){
+  if(ch8==0){
    Servo1 = (roll_input1) - (pitch_input1*-1); Servo1 = constrain(Servo1, -40,40); Servo1 = map(Servo1,-40,40,servo1_down1,servo1_up1); 
    Servo2 = (roll_input1) + (pitch_input1*-1); Servo2 = constrain(Servo2, -40,40); Servo2 = map(Servo2,-40,40,servo2_down1,servo2_up1); 
   }

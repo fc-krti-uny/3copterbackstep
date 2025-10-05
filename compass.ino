@@ -79,10 +79,38 @@ void compass_update()
     // Negasikan nilai Z untuk menyesuaikan dengan konvensi navigasi 'right-hand rule'
     rawZ = -rawZ;
 
-    float calibratedX = ((rawX - x_offset) * x_scale);
-    float calibratedY = ((rawY - y_offset) * y_scale);
+    // 2. Terapkan kalibrasi Hard/Soft Iron (2D) terlebih dahulu
+    // PENTING: Lakukan ini sebelum kompensasi kemiringan!
+    float magX = (rawX - x_offset) * x_scale;
+    float magY = (rawY - y_offset) * y_scale;
+    float magZ = rawZ; // Sumbu Z tidak dikalibrasi di metode 2D ini, kita gunakan nilai mentahnya
+
+    // --- MULAI LOGIKA TILT COMPENSATION ---
+
+    // 3. Hitung sudut Roll (phi) dan Pitch (theta) dari akselerometer
+    // Hasilnya dalam radian, yang kita butuhkan untuk fungsi sin() dan cos()
+    // float rollC = atan2(ay, az);
+    // float pitchC = atan2(-ax, sqrt(ay * ay + az * az));
+    // float acc_x = ax*2.0 / 32768.0;
+    // float acc_y = ay*2.0 / 32768.0;
+
+    // acc_x = constrain(acc_x, -1, 1);
+    // acc_y = constrain(acc_y, -1, 1);
+
+    // float pitchC = asin(acc_x);
+    // float rollC  = asin(-acc_y);
+
+    // // Untuk efisiensi, hitung nilai sin dan cos sekali saja
+    // float cosRoll = cos(rollC);
+    // float sinRoll = sin(rollC);
+    // float cosPitch = cos(pitchC);
+    // float sinPitch = sin(pitchC);
+
+    // // 4. "De-rotate" data magnetometer untuk mendapatkan komponen horizontal
+    // float X_horizontal = magX * cosPitch + magY * sinRoll * sinPitch - magZ * cosRoll * sinPitch;
+    // float Y_horizontal = magY * cosRoll + magZ * sinRoll;
   // Calculate heading
-  float heading = atan2(calibratedY, calibratedX);
+  float heading = atan2(magY, magX);
 
   // Set declination angle on your location and fix heading
   // You can find your declination on: http://magnetic-declination.com/

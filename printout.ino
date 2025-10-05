@@ -1,15 +1,15 @@
 void print_out() {
   timeProgram = micros();
   if (timeProgram - previousTimeProgram >= 100000) 
-  {
+  { 
     // Serial1.print(millis());Serial1.print("\t");
-    // Serial1.print(roll_channel);Serial1.print("\t");
+    Serial1.print(throttle_channel);Serial1.print("\t");
     // Serial1.print(pitch_channel);Serial1.print("\t");
     // Serial1.print(yaw_channel);Serial1.print("\t");
     // Serial1.print(yaw_reference);Serial1.print("\t");
-    // Serial1.print(set_yaw);Serial1.print("\t");
+    // Serial1.print(roll_input);Serial1.print("\t");
     // Serial1.print(yaw_control);Serial1.print("\t");
-    // Serial1.print(PID_virtual_yaw);Serial1.print("\t");
+    // Serial1.print(yaw_input);Serial1.print("\t");
     // Serial1.print(PID_value_yaw);Serial1.print("\t");
     // Serial1.print(yaw_input);Serial1.print("\t");
     // Serial1.print(gx);Serial1.print("\t");

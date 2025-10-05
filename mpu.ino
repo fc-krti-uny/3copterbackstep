@@ -53,7 +53,10 @@ void init_MPU() {
 
 // ==== Ambil YPR & gyro ====
 void get_YPR() {
-  // mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+  mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+    gx = gx / 16.4f; // ±250 dps scale
+    gy = (gy / 16.4f);
+    gz = gz / 16.4f;
     if (!mpuInterrupt) return;   // tidak ada data baru, keluar saja
     mpuInterrupt = false;
 
@@ -92,8 +95,8 @@ void get_YPR() {
     // if(yaw_channel <= 1450 || yaw_channel >= 1550|| ch5==0 || ch6 == 2)set_yaw = yaw_deg;
 
     // ambil gyro mentah → dps
-    mpu.getRotation(&gx, &gy, &gz);
-    gx = gx / 16.4f; // ±250 dps scale
-    gy = (gy / 16.4f);
-    gz = gz / 16.4f;
+    // mpu.getRotation(&gx, &gy, &gz);
+    // gx = gx / 16.4f; // ±250 dps scale
+    // gy = (gy / 16.4f);
+    // gz = gz / 16.4f;
 }

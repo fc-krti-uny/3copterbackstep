@@ -56,8 +56,8 @@ float G_Dt           = 0.005;
 //----------------------Tuning Drone------------------------------------------
 
 float Kp_roll       = 4.5;              float Kp_roll2  = 2;
-float Ki_roll       = 0.35;              float Ki_roll2  = 0;//0.35
-float Kd_roll       = 0.9;                float Kd_roll2  = 0;
+float Ki_roll       = 0.35;              float Ki_roll2  = 0;//0.35`` 
+float Kd_roll       = 0;                float Kd_roll2  = 0;//0.9
 
 float Kp_pitch      = 3.7;                float Kp_pitch2 = 1.85;
 float Ki_pitch      = 0.47;              float Ki_pitch2 = 0;//0.47
@@ -68,7 +68,7 @@ float Ki_yaw        = 0;                float Ki_yaw2   = 0;
 float Kd_yaw        = 0;                float Kd_yaw2   = 0;
 
 float Kp_alt        = 10;                float Kp_alt2   = 0;
-float Ki_alt        = 1;                float Ki_alt2   = 0;
+float Ki_alt        = 0;                float Ki_alt2   = 0;
 float Kd_alt        = 4;                float Kd_alt2   = 0;
 
 float Kp_pos        = 0.3;              float Kp_vel   = 0.05;
@@ -268,7 +268,7 @@ uint8_t MS5611_address = 0x77;             //The I2C address of the MS5611 barom
   unsigned long lastTime = millis();
   float lastRate = 0;
 
-float AltitudeBaroGround,z_position,alt_ref,estimation_altitude;
+float AltitudeBaroGround,z_position,alt_ref,estimation_altitude,altitudeControl_ref;
 int axis;
 // ======================================================== COMPAS ======================================================================
 // Alamat I2C untuk sensor IST8310
