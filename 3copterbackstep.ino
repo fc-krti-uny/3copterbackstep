@@ -2,6 +2,12 @@
 #include "MPU6050_6Axis_MotionApps20.h"
 #include <HardwareSerial.h>
 
+//OSD
+#include <SPI.h>
+#include <max7456.h>
+#define redLed 3
+#define greenLed 4
+
 //BAROMETER
 #include "MS5611.h"
 #include <KalmanFilter.h>
@@ -21,15 +27,21 @@
 //GPS
 #include <Arduino.h>
 
+//kompas
+#include <HMC5883L.h>
+
 // Konstanta radius bumi dalam meter
 #define EARTH_RADIUS_M 6371000.0
 
-
+TwoWire Wire2(PB11,PB10);
 //================================================= ELRS ======================================
 CRSFforArduino *crsf = nullptr;
 HardwareSerial Serial6(PD6,PD5); // define serial pin in this section
 int rcChannelCount = crsfProtocol::RC_CHANNEL_COUNT;
 void onReceiveRcChannels(serialReceiverLayer::rcChannels_t *rcChannels); // is it important?
+
+//================================================= BATERAI ======================================
+float vin, vout, adc;
 
 //================================================ IMU ==========================================
 MPU6050 mpu;
@@ -38,26 +50,26 @@ int16_t mx, my, mz;
 int16_t ax, ay, az;
 int16_t gx, gy, gz;
 float gyroX_filt, gyroY_filt, gyroZ_filt;
-float accelX_filt, accelY_filt, accelZ_filt;
+float accelX, accelY, accelZ;
 
 float G_Dt           = 0.005;
 //----------------------Tuning Drone------------------------------------------
 
-float Kp_roll       = 5.7;              float Kp_roll2  = 1.5;
-float Ki_roll       = 0.3;              float Ki_roll2  = 0;
-float Kd_roll       = 0;                float Kd_roll2  = 0;
+float Kp_roll       = 4.5;              float Kp_roll2  = 2;
+float Ki_roll       = 0.35;              float Ki_roll2  = 0;//0.35`` 
+float Kd_roll       = 0;                float Kd_roll2  = 0;//0.9
 
-float Kp_pitch      = 4;                float Kp_pitch2 = 1.7;
-float Ki_pitch      = 0.3;              float Ki_pitch2 = 0;
+float Kp_pitch      = 3.7;                float Kp_pitch2 = 1.85;
+float Ki_pitch      = 0.47;              float Ki_pitch2 = 0;//0.47
 float Kd_pitch      = 0;                float Kd_pitch2 = 0;
 
 float Kp_yaw        = 1;                float Kp_yaw2   = 0.5;
 float Ki_yaw        = 0;                float Ki_yaw2   = 0;
 float Kd_yaw        = 0;                float Kd_yaw2   = 0;
 
-float Kp_alt        = 0;                float Kp_alt2   = 0;
+float Kp_alt        = 10;                float Kp_alt2   = 0;
 float Ki_alt        = 0;                float Ki_alt2   = 0;
-float Kd_alt        = 0;                float Kd_alt2   = 0;
+float Kd_alt        = 4;                float Kd_alt2   = 0;
 
 float Kp_pos        = 0.3;              float Kp_vel   = 0.05;
 float Ki_pos        = 0;                float Ki_vel   = 0;
@@ -73,13 +85,15 @@ float Kp_pitch3      = 0;                float Kp_pitch4 = 0;
 float Ki_pitch3      = 0;              float Ki_pitch4 = 0;
 float Kd_pitch3      = 0;                float Kd_pitch4 = 0;
 
+float Kp_alt3      = 0;                float Kp_alt4 = 0;
+float Ki_alt3      = 0;              float Ki_alt4 = 0;
+float Kd_alt3      = 0;                float Kd_alt4 = 0;
+
 float gain_yaw1       = 2;
-float gain_altitude1  = 1;
 float gain_latitude1  = 0;
 float gain_longitude1 = 0;
 
 float gain_vel_yaw1   = 0.35;//0.35
-float gain_vel_z1     = 0.1;
 float gain_vel_vel   = 0;
 float gain_vel_long1  = 0;
 //-----------------------------------------------------------------------------
@@ -122,7 +136,7 @@ float PID_value_roll,PID_value_pitch,PID_value_yaw,PID_value_alt,PID_value_pos,P
 float Proll1, Iroll1, Droll1, Ppitch1, Ipitch1, Dpitch1, Pyaw1, Iyaw1, Dyaw1,Palt1, Ialt1, Dalt1;
 float Proll2, Iroll2, Droll2, Ppitch2, Ipitch2, Dpitch2, Pyaw2, Iyaw2, Dyaw2,Palt2, Ialt2, Dalt2;
 float Proll3, Iroll3, Droll3, Ppitch3, Ipitch3, Dpitch3, Pyaw3, Iyaw3, Dyaw3,Palt3, Ialt3, Dalt3;
-float PID_virtual_roll2,PID_virtual_pitch2,PID_value_roll2,PID_value_pitch2;;
+float PID_virtual_roll2,PID_virtual_pitch2,PID_virtual_alt2,PID_value_roll2,PID_value_pitch2;;
 int PID_max = 400;
 int PID_max2 = 30;
 
@@ -170,6 +184,8 @@ volatile int ch9_channel      = 0;
 int ch5, ch6, ch7, ch8, ch9, throttle, pst_mode, alt_mode,head_mode,head_mode1, statusmode;
 int transisi = 0;
 int armStatus = 0;
+int pulse_escx=0;
+int pulse_escy=0; 
 int pulse_esc1=0;
 int pulse_esc2=0; 
 int pulse_esc3 =0; 
@@ -201,27 +217,28 @@ unsigned long pulse_length_esc1 = 1000,
 
 //================================================SERVO===========================================
 
-int servoAngleInit1 = 95;
-int servoAngleInit2 = 95;
+int servoAngleInit1 = 78;
+int servoAngleInit2 = 100;
 
-int servoAngleInitA = 96;
-int servoAngleInitB = 81;
+int servoAngleInitA = 90;
+int servoAngleInitB = 97;
 
-int servo1_up   = 75;
-int servo1_down = 115;
-int servo2_up   = 75;
-int servo2_down = 115;
+int servo1_up   = 48;
+int servo1_down = 108;
+int servo2_up   = 70;
+int servo2_down = 130;
 
-int servo1_up1   = 65;
-int servo1_down1 = 125;
-int servo2_up1   = 53;
-int servo2_down1 = 118;
+int servo1_up1   = 50;
+int servo1_down1 = 130;
+int servo2_up1   = 63;
+int servo2_down1 = 143;
 
 int pulse_length_servo1, pulse_length_servo2;
 int Servo1, Servo2;
 float rollControlServo, pitchControlServo, yawControlServo;
 
 //=============================================BAROMETER==========================================================================---- 
+
 uint16_t C[7];
 uint8_t barometer_counter, temperature_counter, average_temperature_mem_location, start;
 int64_t OFF, OFF_C2, SENS, SENS_C1, P;
@@ -251,7 +268,7 @@ uint8_t MS5611_address = 0x77;             //The I2C address of the MS5611 barom
   unsigned long lastTime = millis();
   float lastRate = 0;
 
-float AltitudeBaroGround,z_position,alt_ref,estimation_altitude;
+float AltitudeBaroGround,z_position,alt_ref,estimation_altitude,altitudeControl_ref;
 int axis;
 // ======================================================== COMPAS ======================================================================
 // Alamat I2C untuk sensor IST8310
@@ -273,9 +290,19 @@ const int CNTL2_REG = 0x0B;      // Register Kontrol 2
 
 const int AVGCNTL_REG = 0x41;    // Register untuk Averaging
 
+// HMC5883L compass;
 float headingDegrees,heading;
 float fixedHeadingDegrees;
-
+float compensateRoll, compensatePitch;
+float cosComRoll, sinComRoll, cosComPitch, sinComPitch;
+float Yh, Xh, Ymag_correct, Xmag_correct;
+float setHeading;
+float heading_reference,heading_control;
+int head = 0;
+const float x_offset = -2; 
+const float y_offset = 32;
+const float x_scale  = 1;
+const float y_scale  = 1;
 //=============================================== GPS ================================================
 // Konstanta radius bumi dalam meter
 #define EARTH_RADIUS_M 6371000.0
@@ -294,7 +321,7 @@ int fwhead1;
 double prevLat = 0, prevLon = 0;
 unsigned long prevMillis = 0;
 double gps_lat,gps_lon,gps_sats;
-double jarak,waktu;
+double jarak,waktu,alt_m;
 
 // Pastikan tidak ada padding byte pada struct (offset harus persis)
 #pragma pack(push, 1)
@@ -355,8 +382,21 @@ inline void ckUpdate(uint8_t b) {
   ckB = ckB + ckA;
 }
 
+//================================================ WAYPOINT ===========================================
 
+#define DEG2RAD 0.01746031746
+#define RAD2DEG 57.2727272727
+float dLon, brlat1, brlat2, a1bearing, a2bearing, bearing, bearingHeading;
+float lat1, lat2, long1, long2;
+float latitude_init, longitude_init;
 
+float WaypointLatitude[1]  = {-7.752695};  
+float WaypointLongitude[1] = {110.209059}; 
+//float WaypointLatitude[3]  = {-7.751326,-7.750563,-7.750566  }; 
+//float WaypointLongitude[3] = {110.348207,110.348688, 110.349594}; 
+int waypointCount = 1;
+int cek_heading = 0;
+int tracking, init_Home = 0, waypoint = 0, waypoint_index = 0;
 
 //================================================ TIMER ==============================================
 unsigned long timerGPS;
@@ -374,15 +414,17 @@ unsigned long transisiTime_current1;
 uint32_t timeProgram, previousTimeProgram;
 uint32_t timeServo, previousTimeServo;
 
-HardwareSerial Serial1(PA10,PA9);
+HardwareSerial Serial1(PA1,PA0);
 //==================================================================================================================================================
-
+// int vout = 23;
 void setup() {
   Serial1.begin(57600);
   #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
-  //   Wire.setSDA(PB9);
-  // Wire.setSCL(PB8);
+  Wire.setSDA(PB9);
+  Wire.setSCL(PB8);
   Wire.begin();
+  Wire2.begin();
+  // Wire2.begin();
   Wire.setClock(400000); // 400kHz I2C clock. Comment this line if having compilation difficulties
   #elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
   Fastwire::setup(400, true);
@@ -392,28 +434,29 @@ void setup() {
   init_MPU();
   elrsinit();
   motor_setup();
-  // baro_initialized();
-  // compass_init();
-  // init_gps();
+  baro_initialized();
+  compass_init();
+  init_gps();
+  osd_init();
   // Serial2.setRxBufferSize(512); // kalau core STM32 support
 }
 
 void loop() {
-  static uint32_t lastIMU=0;
-  if (millis()-lastIMU >= 20) {  // 50 Hz
-    lastIMU = millis();
+  // static uint32_t lastIMU=0;
+  // if (millis()-lastIMU >= 20) {  // 50 Hz
+  //   lastIMU = millis();
 
-  }
+  // }
   get_YPR();
-  // compass_update();
+  compass_update();
   mapremote();
   SerialEvent();
   update_motor();
-     
-  // update_gps();
-    // updateBaro();
-    // printgcs();
-    // outputCompass();
+  update_gps();
+  osd_baca();
+  updateBaro();
+  // printgcs();
+  // outputCompass();
   timeProgram = micros();
   if (timeProgram - previousTimeProgram >= 100000)
   {

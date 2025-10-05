@@ -129,18 +129,18 @@ void mapremote()
 {
   elrsupdate();
   roll_input = 0;
-  if (roll_channel > 1493){roll_input=roll_channel-1493;}else if(roll_channel < 1470){roll_input=roll_channel-1470;} roll_input =constrain(roll_input,-505,493); roll_input/=18;roll_input1=roll_input;
+  if (roll_channel > 1510){roll_input=roll_channel-1510;}else if(roll_channel < 1490){roll_input=roll_channel-1490;} roll_input =constrain(roll_input,-511,510); roll_input/=23;roll_input1=roll_input;
   pitch_input = 0;
-  if (pitch_channel > 1475){pitch_input=pitch_channel-1475;}else if(pitch_channel < 1462){pitch_input=pitch_channel-1462;} pitch_input =constrain(pitch_input,-462,528); pitch_input/=25;pitch_input1=pitch_input;
+  if (pitch_channel > 1511){pitch_input=pitch_channel-1511;}else if(pitch_channel < 1490){pitch_input=pitch_channel-1490;} pitch_input =constrain(pitch_input,-512,511); pitch_input/=25;pitch_input1=pitch_input*1.3;
   yaw_input = 0;
-  if (yaw_channel > 1515){yaw_input=yaw_channel-1515;}else if(yaw_channel < 1500){yaw_input=yaw_channel-1500;} yaw_input =constrain(yaw_input,-497,510); yaw_input/=8;
+  if (yaw_channel > 1518){yaw_input=yaw_channel-1518;}else if(yaw_channel < 1497){yaw_input=yaw_channel-1497;} yaw_input =constrain(yaw_input,-510,500); yaw_input/=8;
   if(ch5_channel<1600){ch5=0;}else if(ch5_channel>1600){ch5=1;}
   if(ch6_channel<1400){ch6=0;}else if(ch6_channel>1400 && ch6_channel<1600){ch6=1;}else if(ch6_channel>1600){ch6=2;}
 //  if(throttle_channel <= 1450 || throttle_channel >= 1530){alt_mode=0;} else if(throttle_channel >= 1450 && throttle_channel <= 1530){alt_mode=1;}
-  if(roll_channel <= 1400 || roll_channel >= 1600 || pitch_channel <= 1400 || pitch_channel >= 1600){pst_mode=0;}else if(roll_channel > 1400 && roll_channel < 1600 && pitch_channel > 1400 && pitch_channel < 1600){pst_mode=1;}
-  if(ch7_channel<1400){head_mode=0;}if(ch7_channel>1400){head_mode=1;}
-  if(ch7_channel<1600){head_mode1=0;}if(ch7_channel>1600){head_mode1=1;}
-//  if(ch8_channel<1400){ch7=0;}if(ch8_channel>1400){ch7=1;}
+  // if(roll_channel <= 1400 || roll_channel >= 1600 || pitch_channel <= 1400 || pitch_channel >= 1600){pst_mode=0;}else if(roll_channel > 1400 && roll_channel < 1600 && pitch_channel > 1400 && pitch_channel < 1600){pst_mode=1;}
+  if(ch7_channel<1400){ch7=0;}if(ch7_channel>1400){ch7=1;}
+  if(ch7_channel<1600){head_mode=0;}if(ch7_channel>1600){head_mode=1;}
+  if(ch8_channel<1400){ch8=0;}if(ch8_channel>1400){ch8=1;}
 }
 
 void SerialEvent() 
