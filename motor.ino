@@ -7,6 +7,7 @@ void motor_setup()
   myservoY.attach(PE4);
   myservoA.attach(PE15);
   myservoB.attach(PE14);
+  delay(3000);
 }
 
 void update_motor()
@@ -30,14 +31,14 @@ void update_motor()
 
   if(ch5==1 && throttle_channel<1000){armStatus=1;}
 
-  if(armStatus==1 && ch6 ==0){
+  if(armStatus==1 && ch6 ==0){  
     controlDrone();
     pulse_escx = 0;
     pulse_escy = 0;
     transisi_servo = 0;
-    fwhead1 = 0;
     statusAktif = 0;
     pitch_transisi = 0;
+    statusmode = 0;
     motA.writeMicroseconds(pulse_length_esc1);
     motB.writeMicroseconds(pulse_length_esc2);
     motC.writeMicroseconds(pulse_length_esc3);
@@ -45,19 +46,20 @@ void update_motor()
     // myservoY.write(pulse_length_servo2);
     myservoA.write(96);
     myservoB.write(81);
-    if((pitch_deg<-40 && pitch_deg>40)||(roll_deg<-40 && roll_deg>40)){
+    if ((abs(pitch_deg) > 40 || abs(roll_deg) > 40)) {
       myservoX.write(servoAngleInit1);
       myservoY.write(servoAngleInit2);
-    }
-    else{
+    } else {
       myservoX.write(pulse_length_servo1);
       myservoY.write(pulse_length_servo2);
     }
-  }
+    }
+  
 
   if(armStatus==1 && ch6==1){
-      controlPlane();
       controlDrone();
+      controlPlane();
+      statusmode = 1;
       // yawtrans = ((yaw_control)*2) + (gz*(0.8));
       // yawtrans=constrain(yawtrans,-50,50);
       // pulse_length_esc1 += yawtrans;
@@ -65,12 +67,12 @@ void update_motor()
 
       transisiTime_current = millis();
       if((transisiTime_current - transisiTime_previous >= 50)){pitch_transisi += 1; transisiTime_previous = transisiTime_current;}
-      if(pitch_transisi > 25){pitch_transisi = 25;} 
-      if(pitch_transisi == 25){pulse_escx = 200; pulse_escy = 200;}
-      pitch_transisi2 = (100-pitch_transisi)-(yawControl*1); 
-      pitch_transisi1 = (pitch_transisi+78)-(yawControl*1);
-      pitch_transisi1 = constrain(pitch_transisi1, 78, 113);
-      pitch_transisi2 = constrain(pitch_transisi2, 65, 100);
+      if(pitch_transisi > 30){pitch_transisi = 30;} 
+      if(pitch_transisi == 30){pulse_escx = 200; pulse_escy = 200;}
+      pitch_transisi2 = (90-pitch_transisi)-(yawControl*1); 
+      pitch_transisi1 = (pitch_transisi+85)-(yawControl*1);
+      pitch_transisi1 = constrain(pitch_transisi1, 75, 145);
+      pitch_transisi2 = constrain(pitch_transisi2, 40, 100);
       // if(pitch_transisi > 40){pitch_transisi2 = 135;}
       // if(pitch_transisi==40){fwhead1 =1;}
       motA.writeMicroseconds(pulse_length_esc1);
@@ -128,20 +130,40 @@ void update_motor()
   //   }
   }
   if(armStatus==1 && ch6==2){
-    controlPlane();
-    transisiTime_current = millis();
-    // if((transisiTime_current - transisiTime_previous >= 50)){pitch_transisi += 1; transisiTime_previous = transisiTime_current;}
-    // if(pitch_transisi > 90){pitch_transisi = 90;}
-    
-    // pitch_transisi1 = 106-pitch_transisi; 
-    // pitch_transisi2 = pitch_transisi+80;
-    // if(pitch_transisi > 80){pitch_transisi2 = 170;}
-    motA.writeMicroseconds(throttle_channel);
-    motB.writeMicroseconds(throttle_channel);
-    motC.writeMicroseconds(1000);
-    myservoX.write(180);
-    myservoY.write(0);
-    myservoA.write(Servo1);
-    myservoB.write(Servo2);
+    if(pitch_transisi < 80){
+      controlPlane();
+      controlDrone();
+      statusmode = 2;
+      transisiTime_current = millis();
+      if((transisiTime_current - transisiTime_previous >= 50)){pitch_transisi += 1; transisiTime_previous = transisiTime_current;}
+      if(pitch_transisi > 80){pitch_transisi = 80;} 
+      if(pitch_transisi > 60){pulse_length_esc3 = 1000;} pulse_length_esc3 = map(pitch_transisi, 60, 80, pulse_length_esc3, 1000);
+      pulse_escx = 200; pulse_escy = 200;
+      pitch_transisi2 = (90-pitch_transisi)-(yawControl*1); 
+      pitch_transisi1 = (pitch_transisi+85)-(yawControl*1);
+      pitch_transisi1 = constrain(pitch_transisi1, 90, 180);
+      pitch_transisi2 = constrain(pitch_transisi2, 0, 90);
+      // if(pitch_transisi > 40){pitch_transisi2 = 135;}
+      // if(pitch_transisi==40){fwhead1 =1;}
+      motA.writeMicroseconds(pulse_length_esc1);
+      motB.writeMicroseconds(pulse_length_esc2);
+      motC.writeMicroseconds(pulse_length_esc3);
+      myservoX.write(pitch_transisi1);
+      myservoY.write(pitch_transisi2);
+      myservoA.write(Servo1);
+      myservoB.write(Servo2);
+
+    }
+    else{
+      controlPlane();
+      statusmode = 3;
+      set_yaw = fixedHeadingDegrees;
+      motA.writeMicroseconds(throttle_channel);
+      motB.writeMicroseconds(throttle_channel);
+      motC.writeMicroseconds(1000);
+      myservoX.write(180);
+      myservoY.write(0);
+      myservoA.write(Servo1);
+      myservoB.write(Servo2);}
   }
 }

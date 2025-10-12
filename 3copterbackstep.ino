@@ -1,3 +1,4 @@
+//MPU
 #include <Wire.h>
 #include "MPU6050_6Axis_MotionApps20.h"
 #include <HardwareSerial.h>
@@ -26,9 +27,13 @@
 
 //GPS
 #include <Arduino.h>
+#include <HardwareTimer.h>
 
 //kompas
 #include <HMC5883L.h>
+
+//Neural Network
+#include "AdaptiveController.h"
 
 // Konstanta radius bumi dalam meter
 #define EARTH_RADIUS_M 6371000.0
@@ -55,15 +60,15 @@ float accelX, accelY, accelZ;
 float G_Dt           = 0.005;
 //----------------------Tuning Drone------------------------------------------
 
-float Kp_roll       = 4.5;              float Kp_roll2  = 2;
+float Kp_roll       = 4;              float Kp_roll2  = 2.5;
 float Ki_roll       = 0.35;              float Ki_roll2  = 0;//0.35`` 
 float Kd_roll       = 0;                float Kd_roll2  = 0;//0.9
 
-float Kp_pitch      = 3.7;                float Kp_pitch2 = 1.85;
+float Kp_pitch      = 3.5;                float Kp_pitch2 = 1.55;
 float Ki_pitch      = 0.47;              float Ki_pitch2 = 0;//0.47
 float Kd_pitch      = 0;                float Kd_pitch2 = 0;
 
-float Kp_yaw        = 1;                float Kp_yaw2   = 0.5;
+float Kp_yaw        = 1.5;                float Kp_yaw2   = 0.6;
 float Ki_yaw        = 0;                float Ki_yaw2   = 0;
 float Kd_yaw        = 0;                float Kd_yaw2   = 0;
 
@@ -119,7 +124,7 @@ float pitchAcc;
 float yaw_reference, set_yaw, yawPrev, yaw_head, yaw_control, yawtrans;
 int yaw_ref = 0;
 #define INTERRUPT_PIN PB12  // use pin 2 on Arduino Uno & most boards
-#define LED_PIN 13 // (Arduino is 13, Teensy is 11, Teensy++ is 6)
+#define LED_PIN PC13 // (Arduino is 13, Teensy is 11, Teensy++ is 6)
 float dt,error_roll,error_pitch,error_yaw,error_alt,error_pos,error_vel,integral_error_roll,integral_error_pitch,integral_error_yaw,
       integral_error_alt,integral_error_pos,integral_error_vel,derivative_error_roll,derivative_error_pitch,derivative_error_yaw,
       derivative_error_alt,derivative_error_pos,derivative_error_vel,last_error_roll,last_error_pitch,last_error_yaw,last_error_alt,
@@ -208,7 +213,7 @@ int transisi_servo = 5;
 #define MAX_PULSE_LENGTH 2000 // Maximum pulse length in µs
 
 Servo motA, motB, motC, motD, myservoX, myservoY, myservoA, myservoB;
-float rollControl, pitchControl, yawControl, altControl;
+float rollControl, pitchControl, yawControl, altControl,yawFiltered;
 float rollControl2, pitchControl2, yawControl2, altControl2;
 unsigned long pulse_length_esc1 = 1000,
               pulse_length_esc2 = 1000,
@@ -217,16 +222,16 @@ unsigned long pulse_length_esc1 = 1000,
 
 //================================================SERVO===========================================
 
-int servoAngleInit1 = 78;
-int servoAngleInit2 = 100;
+int servoAngleInit1 = 85;
+int servoAngleInit2 = 90;
 
 int servoAngleInitA = 90;
 int servoAngleInitB = 97;
 
-int servo1_up   = 48;
-int servo1_down = 108;
-int servo2_up   = 70;
-int servo2_down = 130;
+int servo1_up   = 55;
+int servo1_down = 115;
+int servo2_up   = 60;
+int servo2_down = 120;
 
 int servo1_up1   = 50;
 int servo1_down1 = 130;
@@ -414,6 +419,56 @@ unsigned long transisiTime_current1;
 uint32_t timeProgram, previousTimeProgram;
 uint32_t timeServo, previousTimeServo;
 
+// =========================================================================
+//         BOBOT & BIAS FINAL DARI SIMULASI (UNTUK ROLL & PITCH)
+// =========================================================================
+
+// --- Bobot untuk Sumbu ROLL (Ganti dengan hasil terbaik Anda) ---
+const float weights_ih_roll[INPUT_NEURONS][HIDDEN_NEURONS] = {
+    {2.537, 4.378, 0.083, -0.154, 3.697, 0.008, 17.964, 5.412},
+    {2.448, 4.144, -0.002, 0.089, 3.441, 0.073, 17.136, 5.218},
+    {-0.092, 0.161, -0.013, 0.045, 0.162, -0.062, 0.706, 0.364}
+};
+const float weights_ho_roll[HIDDEN_NEURONS][OUTPUT_NEURONS] = {
+    {0.655}, {-0.177}, {0.026}, {-0.064}, {-0.020}, {0.135}, {0.560}, {0.185}
+};
+const float bias_h_roll[HIDDEN_NEURONS] = {2.633, 2.906, -0.037, -0.049, 2.592, -0.064, 13.559, 4.126};
+const float bias_o_roll[OUTPUT_NEURONS] = {-4.176};
+
+// --- Bobot untuk Sumbu PITCH (Ganti dengan hasil terbaik Anda) ---
+const float weights_ih_pitch[INPUT_NEURONS][HIDDEN_NEURONS] = {
+    {0.0419, 0.3599, 0.4946, 0.0916, 0.5315, 0.4539, -0.0248, 0.4286},
+    {-0.0484, 0.4873, 0.2803, 0.0704, 0.5461, 0.4451, 0.1018, 0.4270},
+    {0.0178, 0.0906, -0.1254, 0.0865, -0.1460, -0.1074, -0.0158, 0.0138}
+};
+const float weights_ho_pitch[HIDDEN_NEURONS][OUTPUT_NEURONS] = {
+    {-0.0380}, {-19.570}, {-12.006}, {-0.0976}, {-21.671}, {-11.858}, {0.1287}, {0.6235}
+};
+const float bias_h_pitch[HIDDEN_NEURONS] = {-0.0618, 14.857, 12.972, -0.0853, 15.262, 12.930, -0.0955, 7.897};
+const float bias_o_pitch[OUTPUT_NEURONS] = {-9.917};
+
+
+// =========================================================================
+//                      PARAMETER & OBJEK KONTROLER
+// =========================================================================
+const float LEARNING_RATE_ROLL = 0.0001; // Ganti dengan nilai optimal roll
+const float LEARNING_RATE_PITCH = 0.01;   // Ganti dengan nilai optimal pitch
+const float MODEL_ZETA = 0.9;
+const float MODEL_OMEGA_N = 50.0;
+
+// Buat DUA objek kontroler, satu untuk setiap sumbu, dengan bobotnya masing-masing
+AdaptiveController roll_controller(LEARNING_RATE_ROLL, MODEL_ZETA, MODEL_OMEGA_N, 
+                                   weights_ih_roll, weights_ho_roll, bias_h_roll, bias_o_roll);
+                                   
+AdaptiveController pitch_controller(LEARNING_RATE_PITCH, MODEL_ZETA, MODEL_OMEGA_N, 
+                                    weights_ih_pitch, weights_ho_pitch, bias_h_pitch, bias_o_pitch);
+
+// Variabel Waktu
+unsigned long last_time_micros = 0;
+
+// Placeholder untuk variabel sistem
+// float target_roll = 0.0, target_pitch = 0.0;
+
 HardwareSerial Serial1(PA1,PA0);
 //==================================================================================================================================================
 // int vout = 23;
@@ -424,20 +479,18 @@ void setup() {
   Wire.setSCL(PB8);
   Wire.begin();
   Wire2.begin();
-  // Wire2.begin();
   Wire.setClock(400000); // 400kHz I2C clock. Comment this line if having compilation difficulties
   #elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
   Fastwire::setup(400, true);
   #endif
-
   // Inisialisasi sensor
   init_MPU();
   elrsinit();
   motor_setup();
-  baro_initialized();
+ baro_initialized();
   compass_init();
   init_gps();
-  osd_init();
+ osd_init();
   // Serial2.setRxBufferSize(512); // kalau core STM32 support
 }
 
@@ -449,14 +502,18 @@ void loop() {
   // }
   get_YPR();
   compass_update();
-  mapremote();
   SerialEvent();
+  mapremote();
   update_motor();
   update_gps();
   osd_baca();
   updateBaro();
-  // printgcs();
-  // outputCompass();
+
+//  roll_controller.compute(roll_input, roll_deg, gx); pitch_controller.compute(pitch_input, pitch_deg, gy);
+//  roll_controller.learn(roll_input, roll_deg, gx);
+//  pitch_controller.learn(pitch_input, pitch_deg, gy);
+//  Kp_roll2 = roll_controller.getKp(); Kp_pitch2 = pitch_controller.getKp();
+
   timeProgram = micros();
   if (timeProgram - previousTimeProgram >= 100000)
   {

@@ -4,14 +4,14 @@ void controlDrone(){
   dt=(currentTime_pid-previousTime_pid);
 //====================================================Virtual PID==============================================================
   if(ch6!=0){roll_input=pitch_input=yaw_input=0;}
-  error_roll1=(roll_input+target_roll)-roll_deg;
-  error_pitch1=(pitch_input*-1+target_pitch*-1)-pitch_deg;
+  error_roll1=(roll_input)-roll_deg;
+  error_pitch1=(pitch_input*-1)-pitch_deg;
   error_yaw1=(yaw_input*-1)-yaw_control;
   error_alt1=alt_input-altitude_m;
   error_pos=0-distance_cm;
 
   integral_error_roll1+=error_roll1*0.01;     integral_error_roll1 = constrain(integral_error_roll1, -100, 100);
-  integral_error_pitch1+=error_pitch1*0.01;   integral_error_pitch1 = constrain(integral_error_pitch1, -100, 100); 
+  integral_error_pitch1+=error_pitch1*0.01;   integral_error_pitch1 = constrain(integral_error_pitch1, -50, 50); 
   integral_error_yaw1+=error_yaw1*0.01;       integral_error_yaw1 = constrain(integral_error_yaw1, -100, 100);
   integral_error_alt1+=error_alt1*0.01;       integral_error_alt1 = constrain(integral_error_alt1, -100, 100);
   integral_error_pos+=error_pos*0.01;
@@ -49,6 +49,8 @@ void controlDrone(){
   derivative_error_yaw=(error_yaw-last_error_yaw)/0.01;
   derivative_error_alt=(error_alt-last_error_alt)/0.01;
   derivative_error_vel=(error_alt-last_error_vel)/0.01;
+
+
 
   Proll=Kp_roll2*error_roll;                 Ppitch=Kp_pitch2*error_pitch;                  Pyaw=Kp_yaw2*error_yaw;                Palt=Kp_alt2*error_alt;                Pvel=Kp_vel*error_vel;
   Iroll=Ki_roll2*integral_error_roll;        Ipitch=Ki_pitch2*integral_error_pitch;         Iyaw=Ki_yaw2*integral_error_yaw;       Ialt=Ki_alt2*integral_error_alt;       Ivel=Ki_vel*integral_error_vel;
@@ -97,6 +99,8 @@ void controlDrone(){
 
 
        yawControl   = constrain(yawControl, -30, 30);
+       yawFiltered = lpf(yawControl, yawFiltered, 0.2);
+       if (abs(yawFiltered) < 2) yawFiltered = 0;
        pitchControl = constrain(pitchControl, -400, 400);
        rollControl  = constrain(rollControl, -400, 400);
        altControl  = constrain(altControl, -200, 200);
@@ -118,16 +122,16 @@ void controlDrone(){
        pulse_length_esc1 = throttle_channel + (pitchControl) + (rollControl) + altControl + pulse_escx; 
        pulse_length_esc3 = throttle_channel - (pitchControl) + altControl; 
        pulse_length_esc2 = throttle_channel + (pitchControl) - (rollControl) + altControl + pulse_escy;
-       pulse_length_servo1 = (yawControl*1);
-       pulse_length_servo2 = (yawControl*1);
+       pulse_length_servo1 = (yawFiltered*1);
+       pulse_length_servo2 = (yawFiltered*1);
 
     pulse_length_esc1 = constrain(pulse_length_esc1, 1100, 2000);
     pulse_length_esc2 = constrain(pulse_length_esc2, 1100, 2000);
     pulse_length_esc3 = constrain(pulse_length_esc3, 1100, 2000);
-    pulse_length_esc3 = map(pulse_length_esc3, 1100, 2000, 1100, 1800);
+    pulse_length_esc3 = map(pulse_length_esc3, 1100, 2000, 1100, 1900);
     pulse_length_servo1 = constrain(pulse_length_servo1, -30, 30);pulse_length_servo1 = map(pulse_length_servo1, -30, 30, servo1_down, servo1_up);
     pulse_length_servo2 = constrain(pulse_length_servo2, -30, 30);pulse_length_servo2 = map(pulse_length_servo2, -30, 30, servo2_down, servo2_up);
-    statusmode = 0;
+    
     // pitch_transisi = 0;
 }
 
@@ -202,3 +206,4 @@ void controlPlane(){
   }
 }
 
+float lpf(float x, float y_prev, float alpha){ return alpha*x + (1-alpha)*y_prev; }

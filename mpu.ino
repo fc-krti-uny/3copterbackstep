@@ -17,13 +17,21 @@ void init_MPU() {
     Serial1.println(F("Initializing DMP..."));
     devStatus = mpu.dmpInitialize();
 
-    // Set offset hasil kalibrasi (ganti dengan hasilmu)
+    // Set offset hasil kalibrasi (ganti dengan hasilmu)(vet)
     mpu.setXGyroOffset(-69);
     mpu.setYGyroOffset(-74);
     mpu.setZGyroOffset(17);
     mpu.setXAccelOffset(50);
     mpu.setYAccelOffset(1332);
     mpu.setZAccelOffset(1950);
+
+    //vit
+    // mpu.setXGyroOffset(-4);
+    // mpu.setYGyroOffset(31);
+    // mpu.setZGyroOffset(-25);
+    // mpu.setXAccelOffset(-3150);
+    // mpu.setYAccelOffset(2008);
+    // mpu.setZAccelOffset(946);
 
     if (devStatus == 0) {
         // Enable DMP
@@ -55,7 +63,7 @@ void init_MPU() {
 void get_YPR() {
   mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
     gx = gx / 16.4f; // ±250 dps scale
-    gy = (gy / 16.4f);
+    gy = gy / 16.4f;
     gz = gz / 16.4f;
     if (!mpuInterrupt) return;   // tidak ada data baru, keluar saja
     mpuInterrupt = false;
