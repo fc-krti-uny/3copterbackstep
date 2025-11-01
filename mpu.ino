@@ -91,16 +91,17 @@ void get_YPR() {
     mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
 
     pitch_deg = ypr[1] * 180.0f / M_PI;
-    roll_deg  = ypr[2] * 180.0f / M_PI;
+    roll_deg  = (ypr[2] * 180.0f / M_PI)-3.2;
     yaw_deg   = ypr[0] * 180.0f / M_PI;
     if (yaw_deg < 0) yaw_deg += 360.0f;
-    // yaw_reference = set_yaw - yaw_deg;
-    // if(yaw_reference >   180) { yaw_reference -= 360;}
-    // if(yaw_reference < - 180) { yaw_reference += 360;}
-    // yaw_control = yaw_reference;   
-    // yawPrev = yaw_deg;
+    yaw_reference = set_yaw - yaw_deg;
+    if(yaw_reference >   180) { yaw_reference -= 360;}
+    if(yaw_reference < - 180) { yaw_reference += 360;}
+    yaw_control = yaw_reference;   
+    yawPrev = yaw_deg;
 
-    // if(yaw_channel <= 1450 || yaw_channel >= 1550|| ch5==0 || ch6 == 2)set_yaw = yaw_deg;
+    if(yaw_channel <= 1450 || yaw_channel >= 1550|| ch5==0)set_yaw = yaw_deg;
+    if((roll_channel <= 1450 || roll_channel >= 1550) && ch6==1)set_yaw = yaw_deg;
 
     // ambil gyro mentah → dps
     // mpu.getRotation(&gx, &gy, &gz);

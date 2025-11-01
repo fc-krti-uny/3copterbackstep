@@ -7,6 +7,7 @@ void motor_setup()
   myservoY.attach(PE4);
   myservoA.attach(PE15);
   myservoB.attach(PE14);
+  myservoD.attach(PE5);
   delay(3000);
 }
 
@@ -25,6 +26,7 @@ void update_motor()
     myservoY.write(servoAngleInit2);
     myservoA.write(servoAngleInitA);
     myservoB.write(servoAngleInitB);
+    // myservoD.write(servoAngleInitD);
     armStatus = 0;
     pitch_transisi = 0;
   }
@@ -38,20 +40,26 @@ void update_motor()
     transisi_servo = 0;
     statusAktif = 0;
     pitch_transisi = 0;
-    statusmode = 0;
+    // statusmode = 0;
     motA.writeMicroseconds(pulse_length_esc1);
     motB.writeMicroseconds(pulse_length_esc2);
     motC.writeMicroseconds(pulse_length_esc3);
     // myservoX.write(pulse_length_servo1);
     // myservoY.write(pulse_length_servo2);
-    myservoA.write(96);
-    myservoB.write(81);
-    if ((abs(pitch_deg) > 40 || abs(roll_deg) > 40)) {
+    myservoA.write(servoAngleInitA);
+    myservoB.write(servoAngleInitB);
+    if ((abs(pitch_deg) > 10 || abs(roll_deg) > 10) && statusmode == 1 ) {
       myservoX.write(servoAngleInit1);
       myservoY.write(servoAngleInit2);
-    } else {
+    } 
+    else if((abs(pitch_deg) > 30 || abs(roll_deg) > 30)){
+      myservoX.write(servoAngleInit1);
+      myservoY.write(servoAngleInit2);
+    }
+    else{
       myservoX.write(pulse_length_servo1);
       myservoY.write(pulse_length_servo2);
+      statusmode = 0;
     }
     }
   
@@ -70,9 +78,9 @@ void update_motor()
       if(pitch_transisi > 30){pitch_transisi = 30;} 
       if(pitch_transisi == 30){pulse_escx = 200; pulse_escy = 200;}
       pitch_transisi2 = (90-pitch_transisi)-(yawControl*1); 
-      pitch_transisi1 = (pitch_transisi+85)-(yawControl*1);
-      pitch_transisi1 = constrain(pitch_transisi1, 75, 145);
-      pitch_transisi2 = constrain(pitch_transisi2, 40, 100);
+      pitch_transisi1 = (pitch_transisi+95)-(yawControl*1);
+      pitch_transisi1 = constrain(pitch_transisi1, 85, 125);
+      pitch_transisi2 = constrain(pitch_transisi2, 60, 100);
       // if(pitch_transisi > 40){pitch_transisi2 = 135;}
       // if(pitch_transisi==40){fwhead1 =1;}
       motA.writeMicroseconds(pulse_length_esc1);
@@ -130,19 +138,19 @@ void update_motor()
   //   }
   }
   if(armStatus==1 && ch6==2){
-    if(pitch_transisi < 80){
+    if(pitch_transisi < 60){
       controlPlane();
       controlDrone();
       statusmode = 2;
       transisiTime_current = millis();
       if((transisiTime_current - transisiTime_previous >= 50)){pitch_transisi += 1; transisiTime_previous = transisiTime_current;}
-      if(pitch_transisi > 80){pitch_transisi = 80;} 
-      if(pitch_transisi > 60){pulse_length_esc3 = 1000;} pulse_length_esc3 = map(pitch_transisi, 60, 80, pulse_length_esc3, 1000);
+      if(pitch_transisi > 60){pitch_transisi = 60;} 
+      if(pitch_transisi > 30){pulse_length_esc3 = 1000;} pulse_length_esc3 = map(pitch_transisi, 30, 60, pulse_length_esc3, 1000);
       pulse_escx = 200; pulse_escy = 200;
       pitch_transisi2 = (90-pitch_transisi)-(yawControl*1); 
-      pitch_transisi1 = (pitch_transisi+85)-(yawControl*1);
-      pitch_transisi1 = constrain(pitch_transisi1, 90, 180);
-      pitch_transisi2 = constrain(pitch_transisi2, 0, 90);
+      pitch_transisi1 = (pitch_transisi+95)-(yawControl*1);
+      pitch_transisi1 = constrain(pitch_transisi1, 90, 150);
+      pitch_transisi2 = constrain(pitch_transisi2, 30, 90);
       // if(pitch_transisi > 40){pitch_transisi2 = 135;}
       // if(pitch_transisi==40){fwhead1 =1;}
       motA.writeMicroseconds(pulse_length_esc1);
@@ -157,13 +165,20 @@ void update_motor()
     else{
       controlPlane();
       statusmode = 3;
-      set_yaw = fixedHeadingDegrees;
+      set_yaw = yaw_deg;
       motA.writeMicroseconds(throttle_channel);
       motB.writeMicroseconds(throttle_channel);
       motC.writeMicroseconds(1000);
-      myservoX.write(180);
-      myservoY.write(0);
+      myservoX.write(150);
+      myservoY.write(30);
       myservoA.write(Servo1);
       myservoB.write(Servo2);}
+  }
+
+  if(ch8==0){
+    myservoD.write(55);
+  }
+  else if(ch8==1){
+    myservoD.write(0);
   }
 }

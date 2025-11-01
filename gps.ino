@@ -108,14 +108,14 @@ void printNavPvt(const NAV_PVT_t& p) {
 }
 
 void init_gps(){
-  Serial2.begin(230400);
+  Serial3.begin(230400);
   // Serial.println("UBX NAV-PVT parser start");
 }
 
 void update_gps(){
     // Feed parser dengan byte dari GPS
-  while (Serial2.available()) {
-    feedUBX((uint8_t)Serial2.read());
+  while (Serial3.available()) {
+    feedUBX((uint8_t)Serial3.read());
   }
 
   // Kalau ada NAV-PVT baru & valid checksum → cetak

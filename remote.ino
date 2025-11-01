@@ -128,9 +128,9 @@
 void mapremote(){
   elrsupdate();
   roll_input = 0;
-  if (roll_channel > 1510){roll_input=roll_channel-1510;}else if(roll_channel < 1490){roll_input=roll_channel-1490;} roll_input =constrain(roll_input,-511,510); roll_input/=23;roll_input1=roll_input;
+  if (roll_channel > 1510){roll_input=roll_channel-1510;}else if(roll_channel < 1490){roll_input=roll_channel-1490;} roll_input =constrain(roll_input,-511,510); roll_input/=23;roll_input1=roll_input*2;
   pitch_input = 0;
-  if (pitch_channel > 1511){pitch_input=pitch_channel-1511;}else if(pitch_channel < 1490){pitch_input=pitch_channel-1490;} pitch_input =constrain(pitch_input,-512,511); pitch_input/=25;pitch_input1=pitch_input*1.3;
+  if (pitch_channel > 1511){pitch_input=pitch_channel-1511;}else if(pitch_channel < 1490){pitch_input=pitch_channel-1490;} pitch_input =constrain(pitch_input,-512,511); pitch_input/=25;pitch_input1=pitch_input*2;
   yaw_input = 0;
   if (yaw_channel > 1550){yaw_input=yaw_channel-1550;}else if(yaw_channel < 1450){yaw_input=yaw_channel-1450;} yaw_input =constrain(yaw_input,-510,500); yaw_input/=8;
   if(ch5_channel<1600){ch5=0;}else if(ch5_channel>1600){ch5=1;}
@@ -157,10 +157,10 @@ while (Serial1.available()){ inChar = Serial1.read();
   //  if (inChar == 'y'){ servo1_up -= 1;servo1_down -= 1;servo2_up -= 1;servo2_down -= 1;}
   //  if (inChar == 'i'){ servo1_up += 1;servo1_down += 1;servo2_up -= 1;servo2_down -= 1;}
   //  if (inChar == 'o'){ servo1_up -= 1;servo1_down -= 1;servo2_up += 1;servo2_down += 1;}
-  //  if (inChar == 'u'){ servo1_up += 1;servo1_down += 1;}
-  //  if (inChar == 'y'){ servo1_up -= 1;servo1_down -= 1;}
-  //  if (inChar == 'i'){ servo2_up += 1;servo2_down += 1;}
-  //  if (inChar == 'o'){ servo2_up -= 1;servo2_down -= 1;}
+  //  if (inChar == 'u'){ servo1_up1 += 1;servo1_down1 += 1;}
+  //  if (inChar == 'y'){ servo1_up1 -= 1;servo1_down1 -= 1;}
+  //  if (inChar == 'i'){ servo2_up1 += 1;servo2_down1 += 1;}
+  //  if (inChar == 'o'){ servo2_up1 -= 1;servo2_down1 -= 1;}
 
     //========== gain tunning ==========
 //    //roll gain feedback ==========
@@ -174,14 +174,14 @@ while (Serial1.available()){ inChar = Serial1.read();
     //  if (inChar == 'i'){ Kp_roll2 -= 0.01;}
    
 //    //pitch gain feedback ==========
-     if (inChar == 'a'){ Kp_pitch += 0.1;}
-     if (inChar == 's'){ Kp_pitch -= 0.1;}
-     if (inChar == 'd'){ Ki_pitch += 0.01;}
-     if (inChar == 'f'){ Ki_pitch -= 0.01;}
-     if (inChar == 'g'){ Kd_pitch += 0.01;}
-     if (inChar == 'h'){ Kd_pitch -= 0.01;}
-     if (inChar == 'j'){ Kp_pitch2 += 0.01;}
-     if (inChar == 'k'){ Kp_pitch2 -= 0.01;}
+    //  if (inChar == 'a'){ Kp_pitch += 0.1;}
+    //  if (inChar == 's'){ Kp_pitch -= 0.1;}
+    //  if (inChar == 'd'){ Ki_pitch += 0.01;}
+    //  if (inChar == 'f'){ Ki_pitch -= 0.01;}
+    //  if (inChar == 'g'){ Kd_pitch += 0.01;}
+    //  if (inChar == 'h'){ Kd_pitch -= 0.01;}
+    //  if (inChar == 'j'){ Kp_pitch2 += 0.01;}
+    //  if (inChar == 'k'){ Kp_pitch2 -= 0.01;}
 
     //  if (inChar == 'z'){ Kp_pos += 0.01;}
     //  if (inChar == 'x'){ Kp_pos -= 0.01;}
@@ -219,8 +219,8 @@ while (Serial1.available()){ inChar = Serial1.read();
 //   if (inChar == 'o'){ pulse_esc44 += 10;}
 //   if (inChar == 'p'){ pulse_esc44 -= 10;}
 //    
-  //  if (inChar == 'l'){ danger = 1;}
-  //  if (inChar == 'k'){ darurat = 1;}
+  //  if (inChar == 'l'){ drop += 1;}
+  //  if (inChar == 'k'){ drop -= 1;}
 ////    
 //  ===============IMU on===============================
     //  if (inChar == 'u'){ last_pitch1 += 0.1;}

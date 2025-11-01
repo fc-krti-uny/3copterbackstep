@@ -1,5 +1,5 @@
 void elrsinit(){
-  crsf = new CRSFforArduino(&Serial6, PD6,PD5); // define Serial1 pin in this section too
+  crsf = new CRSFforArduino(&Serial2, PD6,PD5); // define Serial1 pin in this section too
     if (!crsf->begin())
     {
         crsf->end();

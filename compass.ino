@@ -117,7 +117,7 @@ void compass_update()
   // (+) Positive or (-) for negative
   // For Bytom / Poland declination angle is 4'26E (positive)
   // Formula: (deg + (min / 60.0)) / (180 / M_PI);
-  float declinationAngle = (0.0 + (46.0 / 60.0)) / (180 / M_PI);
+  float declinationAngle = (0.0 + (0.0 / 60.0)) / (180 / M_PI);
   heading += declinationAngle;
 
   // Correct for heading < 0deg and heading > 360deg
@@ -145,13 +145,13 @@ void compass_update()
     fixedHeadingDegrees = mapFloat(headingDegrees, 0, 90, 270, 360);
   }
 
-    yaw_reference = set_yaw - fixedHeadingDegrees;
-    if(yaw_reference >   180) { yaw_reference -= 360;}
-    if(yaw_reference < - 180) { yaw_reference += 360;}
-    yaw_control = yaw_reference;
-    yawPrev = fixedHeadingDegrees;
+    // yaw_reference = set_yaw - fixedHeadingDegrees;
+    // if(yaw_reference >   180) { yaw_reference -= 360;}
+    // if(yaw_reference < - 180) { yaw_reference += 360;}
+    // yaw_control = yaw_reference;
+    // yawPrev = fixedHeadingDegrees;
 
-    if(yaw_channel <= 1450 || yaw_channel >= 1550|| ch5==0)set_yaw = fixedHeadingDegrees;
+    // if(yaw_channel <= 1450 || yaw_channel >= 1550|| ch5==0)set_yaw = fixedHeadingDegrees;
   // Tampilkan data mentah yang sudah digabungkan ke Serial1 Monitor
     // Serial1.print("Raw X: "); Serial1.print(rawX);
     // Serial1.print("\t| Raw Y: "); Serial1.print(rawY);

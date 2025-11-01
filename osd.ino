@@ -29,21 +29,24 @@ void osd_init() {
 
 void osd_baca() {
   //Sintaks nampilin data FC ke kamera
-  char rollBuffer[10];
-  dtostrf(roll_deg, 6, 2, rollBuffer);
-  osd.print(rollBuffer, 0, 1); 
+  // char rollBuffer[10];
+  // dtostrf(roll_deg, 6, 2, rollBuffer);
+  // osd.print(rollBuffer, 0, 1); 
   
-  char pitchBuffer[10];
-  dtostrf(pitch_deg, 6, 2, pitchBuffer);
-  osd.print(pitchBuffer, 7, 1); 
+  // char pitchBuffer[10];
+  // dtostrf(pitch_deg, 6, 2, pitchBuffer);
+  // osd.print(pitchBuffer, 7, 1); 
 
-  char latBuffer[10];
-  dtostrf(gps_lat, 6, 2, latBuffer);
-  osd.print(latBuffer, 0, 3); 
-  
-  char lonBuffer[10];
-  dtostrf(gps_lon, 6, 2, lonBuffer);
-  osd.print(lonBuffer, 7, 3); 
+  char latBuffer[15];
+  dtostrf(gps_lat, 10, 6, latBuffer); // 6 angka di belakang koma cukup akurat
+  osd.print("LAT:", 0, 2);
+  osd.print(latBuffer, 4, 2);
+
+  char lonBuffer[15];
+  dtostrf(gps_lon, 10, 6, lonBuffer);
+  osd.print("LON:", 0, 3);
+  osd.print(lonBuffer, 4, 3);
+
   
   if (counter % 2 == 0) {
     digitalWrite(redLed, LOW);
@@ -58,5 +61,14 @@ void osd_baca() {
   osd.print(int(counter / 60), 10, 6, 2, 0, false, true);
   osd.print(int(counter % 60), 13, 6, 2, 0, false, true);
 
+  char voltBuffer[10];
+  dtostrf(vout, 5, 2, voltBuffer);  // total 5 digit, 2 angka di belakang koma
+  osd.print("V:", 0, 5);               // label
+  osd.print(voltBuffer, 2, 5);         // nilai
+
+  char currBuffer[10];
+  dtostrf(currentSense, 5, 2, currBuffer);
+  osd.print("A:", 8, 5);               // label
+  osd.print(currBuffer, 10, 5);        // nilai
   // delay(100);
 }

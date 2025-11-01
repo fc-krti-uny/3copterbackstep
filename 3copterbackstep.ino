@@ -41,12 +41,14 @@
 TwoWire Wire2(PB11,PB10);
 //================================================= ELRS ======================================
 CRSFforArduino *crsf = nullptr;
-HardwareSerial Serial6(PD6,PD5); // define serial pin in this section
+HardwareSerial Serial2(PD6,PD5); // define serial pin in this section
 int rcChannelCount = crsfProtocol::RC_CHANNEL_COUNT;
 void onReceiveRcChannels(serialReceiverLayer::rcChannels_t *rcChannels); // is it important?
 
 //================================================= BATERAI ======================================
 float vin, vout, adc;
+float currentADC, currentSense;
+const float CURRENT_SCALE = 17.0; // ampere per volt, tergantung power module
 
 //================================================ IMU ==========================================
 MPU6050 mpu;
@@ -60,11 +62,11 @@ float accelX, accelY, accelZ;
 float G_Dt           = 0.005;
 //----------------------Tuning Drone------------------------------------------
 
-float Kp_roll       = 4;              float Kp_roll2  = 2.5;
-float Ki_roll       = 0.35;              float Ki_roll2  = 0;//0.35`` 
+float Kp_roll       = 4.25;              float Kp_roll2  = 2.2;
+float Ki_roll       = 0.37;              float Ki_roll2  = 0;//0.35`` 
 float Kd_roll       = 0;                float Kd_roll2  = 0;//0.9
-
-float Kp_pitch      = 3.5;                float Kp_pitch2 = 1.55;
+ 
+float Kp_pitch      = 3.5;                float Kp_pitch2 = 1.7;
 float Ki_pitch      = 0.47;              float Ki_pitch2 = 0;//0.47
 float Kd_pitch      = 0;                float Kd_pitch2 = 0;
 
@@ -199,7 +201,7 @@ int pulse_esc11=60;
 int pulse_esc22=0; 
 int pulse_esc33=0; 
 int pulse_esc44=60;
-int roll_input, pitch_input, yaw_input, alt_input;
+int roll_input, pitch_input, yaw_input, alt_input, yaw_target;
 int roll_input1, pitch_input1, yaw_input1;
 int pitch_transisi,pitch_transisi1,pitch_transisi2;
 float pitch_ch_previous, roll_ch_previous, yaw_ch_previous, throt_ch_previous;
@@ -212,7 +214,7 @@ int transisi_servo = 5;
 #define MIN_PULSE_LENGTH 1000 // Minimum pulse length in µs
 #define MAX_PULSE_LENGTH 2000 // Maximum pulse length in µs
 
-Servo motA, motB, motC, motD, myservoX, myservoY, myservoA, myservoB;
+Servo motA, motB, motC, motD, myservoX, myservoY, myservoA, myservoB, myservoD;
 float rollControl, pitchControl, yawControl, altControl,yawFiltered;
 float rollControl2, pitchControl2, yawControl2, altControl2;
 unsigned long pulse_length_esc1 = 1000,
@@ -222,24 +224,27 @@ unsigned long pulse_length_esc1 = 1000,
 
 //================================================SERVO===========================================
 
-int servoAngleInit1 = 85;
+int servoAngleInit1 = 95;
 int servoAngleInit2 = 90;
 
-int servoAngleInitA = 90;
-int servoAngleInitB = 97;
+int servoAngleInitA = 100;
+int servoAngleInitB = 108;
 
-int servo1_up   = 55;
-int servo1_down = 115;
-int servo2_up   = 60;
-int servo2_down = 120;
+int servoAngleInitD = 55;
 
-int servo1_up1   = 50;
-int servo1_down1 = 130;
-int servo2_up1   = 63;
-int servo2_down1 = 143;
+int servo1_up   = 60;
+int servo1_down = 120;
+int servo2_up   = 65;
+int servo2_down = 125;
+
+int servo1_up1   = 60;
+int servo1_down1 = 140;
+int servo2_up1   = 68;
+int servo2_down1 = 148;
 
 int pulse_length_servo1, pulse_length_servo2;
 int Servo1, Servo2;
+int drop = 80;
 float rollControlServo, pitchControlServo, yawControlServo;
 
 //=============================================BAROMETER==========================================================================---- 
@@ -313,7 +318,7 @@ const float y_scale  = 1;
 #define EARTH_RADIUS_M 6371000.0
 #define RX_PIN PD9
 #define TX_PIN PD8
-HardwareSerial Serial2(PD9, PD8); //RX TX3
+HardwareSerial Serial3(PD9, PD8); //RX TX3
 #define UBX_SYNC1 0xB5
 #define UBX_SYNC2 0x62
 #define UBX_CLASS_NAV 0x01
@@ -469,11 +474,19 @@ unsigned long last_time_micros = 0;
 // Placeholder untuk variabel sistem
 // float target_roll = 0.0, target_pitch = 0.0;
 
+//esc
+String inputData = "";
+float teganganInput, teganganOutput, arus, suhu;
+String status_esc;
+HardwareSerial Serial6(PC7,PC6);
+
 HardwareSerial Serial1(PA1,PA0);
+
 //==================================================================================================================================================
-// int vout = 23;
+
 void setup() {
   Serial1.begin(57600);
+  Serial6.begin(115200);
   #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
   Wire.setSDA(PB9);
   Wire.setSCL(PB8);
@@ -487,10 +500,10 @@ void setup() {
   init_MPU();
   elrsinit();
   motor_setup();
- baro_initialized();
+  baro_initialized();
   compass_init();
   init_gps();
- osd_init();
+  // osd_init();
   // Serial2.setRxBufferSize(512); // kalau core STM32 support
 }
 
@@ -506,8 +519,10 @@ void loop() {
   mapremote();
   update_motor();
   update_gps();
-  osd_baca();
+  // osd_baca();
   updateBaro();
+  esc_read();
+  batterypercent();
 
 //  roll_controller.compute(roll_input, roll_deg, gx); pitch_controller.compute(pitch_input, pitch_deg, gy);
 //  roll_controller.learn(roll_input, roll_deg, gx);

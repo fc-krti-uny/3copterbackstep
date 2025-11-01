@@ -179,11 +179,11 @@ float AdaptiveController::compute(float target_angle, float actual_angle, float 
 
 void AdaptiveController::learn(float target_angle, float actual_angle, float actual_rate) {
     // Abaikan semua perhitungan e_adapt untuk tes ini
-    /*
+    
     float virtual_control = 4.5 * (target_angle - actual_angle);
     float ideal_rate = model.update(virtual_control);
     float e_adapt = actual_rate - ideal_rate;
-    */
+    
 
     // --- TES BELAJAR PAKSA ---
     // Berikan sinyal error konstan yang kuat.
