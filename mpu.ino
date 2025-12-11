@@ -90,7 +90,7 @@ void get_YPR() {
     mpu.dmpGetGravity(&gravity, &q);
     mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
 
-    pitch_deg = ypr[1] * 180.0f / M_PI;
+    pitch_deg = (ypr[1] * 180.0f / M_PI);
     roll_deg  = (ypr[2] * 180.0f / M_PI)-3.2;
     yaw_deg   = ypr[0] * 180.0f / M_PI;
     if (yaw_deg < 0) yaw_deg += 360.0f;

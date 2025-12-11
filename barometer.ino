@@ -118,6 +118,7 @@ void updateBaro() {
     actual_pressure = actual_pressure_slow;
 
     altitude_m = 44330*(1-pow((actual_pressure*0.01) /1013.25, 0.1903));
+    altitude_m = altitude_m*1.5;
     // altitude_m = MS5611.getAltitude();
     altitude_cm = altitude_m*100;
 

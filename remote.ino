@@ -135,11 +135,11 @@ void mapremote(){
   if (yaw_channel > 1550){yaw_input=yaw_channel-1550;}else if(yaw_channel < 1450){yaw_input=yaw_channel-1450;} yaw_input =constrain(yaw_input,-510,500); yaw_input/=8;
   if(ch5_channel<1600){ch5=0;}else if(ch5_channel>1600){ch5=1;}
   if(ch6_channel<1400){ch6=0;}else if(ch6_channel>1400 && ch6_channel<1600){ch6=1;}else if(ch6_channel>1600){ch6=2;}
-//  if(throttle_channel <= 1450 || throttle_channel >= 1530){alt_mode=0;} else if(throttle_channel >= 1450 && throttle_channel <= 1530){alt_mode=1;}
-  // if(roll_channel <= 1400 || roll_channel >= 1600 || pitch_channel <= 1400 || pitch_channel >= 1600){pst_mode=0;}else if(roll_channel > 1400 && roll_channel < 1600 && pitch_channel > 1400 && pitch_channel < 1600){pst_mode=1;}
-  if(ch7_channel<1400){ch7=0;}if(ch7_channel>1400){ch7=1;}
+  if(throttle_channel <= 1450 || throttle_channel >= 1550){alt_mode=0;} else if(throttle_channel >= 1450 && throttle_channel <= 1550){alt_mode=1;}
+  if(roll_channel <= 1400 || roll_channel >= 1600 || pitch_channel <= 1400 || pitch_channel >= 1600){pst_mode=0;}else if(roll_channel > 1400 && roll_channel < 1600 && pitch_channel > 1400 && pitch_channel < 1600){pst_mode=1;}
+  // if(ch7_channel<1400){ch7=0;}if(ch7_channel>1400){ch7=1;}
   if(ch7_channel<1600){head_mode=0;}if(ch7_channel>1600){head_mode=1;}
-  if(ch8_channel<1400){ch8=0;}if(ch8_channel>1400){ch8=1;}
+  // if(ch8_channel<1400){ch8=0;}if(ch8_channel>1400){ch8=1;}
 }
 
 void SerialEvent() {
@@ -183,11 +183,15 @@ while (Serial1.available()){ inChar = Serial1.read();
     //  if (inChar == 'j'){ Kp_pitch2 += 0.01;}
     //  if (inChar == 'k'){ Kp_pitch2 -= 0.01;}
 
-    //  if (inChar == 'z'){ Kp_pos += 0.01;}
-    //  if (inChar == 'x'){ Kp_pos -= 0.01;}
-    //  if (inChar == 'c'){ Kp_vel += 0.01;}
-    //  if (inChar == 'v'){ Kp_vel -= 0.01;}
-////    
+     if (inChar == 'z'){ Kp_pos += 0.01;}
+     if (inChar == 'x'){ Kp_pos -= 0.01;}
+     if (inChar == 'c'){ Kd_pos += 0.01;}
+     if (inChar == 'v'){ Kd_pos -= 0.01;}
+////   
+     if (inChar == '1'){ Kp_alt += 1;}
+     if (inChar == '2'){ Kp_alt -= 1;}
+     if (inChar == '3'){ Kd_alt += 1;}
+     if (inChar == '4'){ Kd_alt -= 1;} 
 ////    //yaw gain feedback ==========
     // if (inChar == 'z'){ gain_yaw += 0.01;}
     // if (inChar == 'x'){ gain_yaw -= 0.01;}

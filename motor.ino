@@ -75,12 +75,12 @@ void update_motor()
 
       transisiTime_current = millis();
       if((transisiTime_current - transisiTime_previous >= 50)){pitch_transisi += 1; transisiTime_previous = transisiTime_current;}
-      if(pitch_transisi > 30){pitch_transisi = 30;} 
-      if(pitch_transisi == 30){pulse_escx = 200; pulse_escy = 200;}
+      if(pitch_transisi > 25){pitch_transisi = 25;} 
+      if(pitch_transisi == 25){pulse_escx = 150; pulse_escy = 150;}
       pitch_transisi2 = (90-pitch_transisi)-(yawControl*1); 
       pitch_transisi1 = (pitch_transisi+95)-(yawControl*1);
-      pitch_transisi1 = constrain(pitch_transisi1, 85, 125);
-      pitch_transisi2 = constrain(pitch_transisi2, 60, 100);
+      pitch_transisi1 = constrain(pitch_transisi1, 85, 120);
+      pitch_transisi2 = constrain(pitch_transisi2, 65, 100);
       // if(pitch_transisi > 40){pitch_transisi2 = 135;}
       // if(pitch_transisi==40){fwhead1 =1;}
       motA.writeMicroseconds(pulse_length_esc1);
@@ -166,6 +166,8 @@ void update_motor()
       controlPlane();
       statusmode = 3;
       set_yaw = yaw_deg;
+      target_lat = gps_lat;
+      target_lon = gps_lon;
       motA.writeMicroseconds(throttle_channel);
       motB.writeMicroseconds(throttle_channel);
       motC.writeMicroseconds(1000);

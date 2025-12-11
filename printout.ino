@@ -3,24 +3,30 @@ void print_out() {
   if (timeProgram - previousTimeProgram >= 100000){ 
     // Serial1.print(millis());Serial1.print("\t");
     // Serial1.print(throttle_channel);Serial1.print("\t");
-    // Serial1.print(pitch_channel);Serial1.print("\t");
-    // Serial1.print(vout);Serial1.print("\t");
-    // Serial1.print(pitch_transisi1);Serial1.print("\t");
-    // Serial1.print(pitch_transisi2);Serial1.print("\t");
-    // Serial1.print(suhu);Serial1.print("\t");
-    // Serial1.print(status_esc);Serial1.print("\t");
-  //  Serial1.print(pitch_input*-1);Serial1.print("\t");
-  //  Serial1.print(statusmode);Serial1.print("\t");
-    // Serial1.print(gx);Serial1.print("\t");
-    // Serial1.print(gy);Serial1.print("\t");
-    // Serial1.print(gz);Serial1.print("\t");
-    // Serial1.print(drop);Serial1.print("\t");
-    // atitude_data();
+    // Serial1.print(altro);Serial1.print("\t");
+    // Serial1.print(altControl);Serial1.print("\t");
+    // Serial1.print(derivative_error_alt1);Serial1.print("\t");
+    // Serial1.print(getAltitudeDerivative());Serial1.print("\t");
+    Serial1.print(alt_mode);Serial1.print("\t");
+    Serial1.print(head_mode);Serial1.print("\t");
+    Serial1.print(roll_input);Serial1.print("\t");
+    Serial1.print(pitch_input);Serial1.print("\t");  
+    Serial1.print(target_roll);Serial1.print("\t");
+    Serial1.print(target_pitch);Serial1.print("\t");
+    Serial1.print(distance_cm);Serial1.print("\t");
+    Serial1.print(error_roll_body);Serial1.print("\t");
+    Serial1.print(error_pitch_body);Serial1.print("\t");
+    Serial1.print(derivative_roll);Serial1.print("\t");
+    Serial1.print(derivative_pitch);Serial1.print("\t");
+    Serial1.print(last_error_pitch_body);Serial1.print("\t");
+    Serial1.print(last_error_roll_body);Serial1.print("\t");
+    Serial1.print(error_alt1);Serial1.print("\t");
+    Serial1.print(derivative_error_alt1);Serial1.print("\t");
+    atitude_data();
     // motorServo_ManualTrimming();
-    // gainTuningFeedback();
+    gainTuningFeedback();
     // motor_output();
-    printgcs();
-    
+    // printgcs();    
     Serial1.println();
     previousTimeProgram = micros();
   }
@@ -35,6 +41,7 @@ void atitude_data() {
   Serial1.print(z_position)      ;Serial1.print("\t");
   Serial1.print(gps_lat,7)      ;Serial1.print("\t");
   Serial1.print(gps_lon,7)      ;Serial1.print("\t");
+  Serial1.print(gps_sats);Serial1.print("\t");
 }
 
 void motor_output(){
@@ -59,10 +66,10 @@ void gainTuningFeedback()
   // Serial1.print(Kd_pitch,3)      ;Serial1.print("\t");
   // Serial1.print(Kp_pitch2,3)      ;Serial1.print("\t");
 
-  // Serial1.print(Kp_pos,2)      ;Serial1.print("\t");
-  // Serial1.print(Kp_vel,2)      ;Serial1.print("\t");
-  // Serial1.print(gain_yaw,3)      ;Serial1.print("\t");
-  // Serial1.print(gain_vel_yaw,4)  ;Serial1.print("\t");
+  Serial1.print(Kp_pos,2)      ;Serial1.print("\t");
+  Serial1.print(Kd_pos,2)      ;Serial1.print("\t");
+  Serial1.print(Kp_alt)      ;Serial1.print("\t");
+  Serial1.print(Kd_alt)  ;Serial1.print("\t");
 }
 
 // void motorServo_ManualTrimming(){

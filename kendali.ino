@@ -5,67 +5,65 @@ void controlDrone(){
 //====================================================Virtual PID==============================================================
   if(ch6!=0){yaw_target=roll_input;}
   else if(ch6 == 0){yaw_target = yaw_input;}
-  error_roll1=(roll_input)-roll_deg;
-  error_pitch1=(pitch_input*-1)-pitch_deg;
+  error_roll1=(roll_input+target_roll)-roll_deg;
+  error_pitch1=(pitch_input*-1+target_pitch*-1)-pitch_deg;
   error_yaw1=(yaw_target*-1)-yaw_control;
   error_alt1=alt_input-altitude_m;
-  error_pos=0-distance_cm;
+  // error_pos= error_pitch_body;
 
-  integral_error_roll1+=error_roll1*0.01;     integral_error_roll1 = constrain(integral_error_roll1, -100, 100);
-  integral_error_pitch1+=error_pitch1*0.01;   integral_error_pitch1 = constrain(integral_error_pitch1, -100, 100); 
+  integral_error_roll1+=error_roll1*0.01;     integral_error_roll1 = constrain(integral_error_roll1, -150, 150);
+  integral_error_pitch1+=error_pitch1*0.01;   integral_error_pitch1 = constrain(integral_error_pitch1, -150, 150); 
   integral_error_yaw1+=error_yaw1*0.01;       integral_error_yaw1 = constrain(integral_error_yaw1, -100, 100);
   integral_error_alt1+=error_alt1*0.01;       integral_error_alt1 = constrain(integral_error_alt1, -100, 100);
-  integral_error_pos+=error_pos*0.01;
+  // integral_error_pos+=error_pos*0.01;
 
   derivative_error_roll1=(error_roll1-last_error_roll1)/0.01;
   derivative_error_pitch1=(error_pitch1-last_error_pitch1)/0.01;
   derivative_error_yaw1=(error_yaw1-last_error_yaw1)/0.01;
   derivative_error_alt1=(error_alt1-last_error_alt1)/0.01;
-  derivative_error_pos=(error_pos-last_error_pos)/0.01;
+  // derivative_error_pos=(error_pos-last_error_pos)/0.01;
 
-  Proll1=Kp_roll*error_roll1;                 Ppitch1=Kp_pitch*error_pitch1;                  Pyaw1=Kp_yaw*error_yaw1;                Palt1=Kp_alt*error_alt1;                    Ppos=Kp_pos*error_pos;
-  Iroll1=Ki_roll*integral_error_roll1;        Ipitch1=Ki_pitch*integral_error_pitch1;         Iyaw1=Ki_yaw*integral_error_yaw1;       Ialt1=Ki_alt*integral_error_alt1;           Ipos=Ki_pos*integral_error_pos;
-  Droll1=Kd_roll*(derivative_error_roll1);    Dpitch1=Kd_pitch*(derivative_error_pitch1);     Dyaw1=Kd_yaw*(derivative_error_yaw1);   Dalt1=Kd_alt*(derivative_error_alt1);       Dpos=Kd_pos*(derivative_error_pos);
-  last_error_roll1=error_roll1;               last_error_pitch1=error_pitch1;                 last_error_yaw1=error_yaw1;             last_error_alt1=error_alt1;                 last_error_pos=error_pos;
+  Proll1=Kp_roll*error_roll1;                 Ppitch1=Kp_pitch*error_pitch1;                  Pyaw1=Kp_yaw*error_yaw1;                Palt1=Kp_alt*error_alt1;                   //Ppos=Kp_pos*error_pos;
+  Iroll1=Ki_roll*integral_error_roll1;        Ipitch1=Ki_pitch*integral_error_pitch1;         Iyaw1=Ki_yaw*integral_error_yaw1;       Ialt1=Ki_alt*integral_error_alt1;          //Ipos=Ki_pos*integral_error_pos;
+  Droll1=Kd_roll*(derivative_error_roll1);    Dpitch1=Kd_pitch*(derivative_error_pitch1);     Dyaw1=Kd_yaw*(derivative_error_yaw1);   Dalt1=Kd_alt*(derivative_error_alt1);      //Dpos=Kd_pos*(derivative_error_pos);
+  last_error_roll1=error_roll1;               last_error_pitch1=error_pitch1;                 last_error_yaw1=error_yaw1;             last_error_alt1=error_alt1;                //last_error_pos=error_pos;
 
-  PID_virtual_roll = Proll1 + Iroll1 + Droll1;   PID_virtual_pitch = Ppitch1 + Ipitch1 + Dpitch1;   PID_virtual_yaw = Pyaw1 + Iyaw1 + Dyaw1;   PID_virtual_alt = Palt1 + Ialt1 + Dalt1;  PID_virtual_pos = Ppos + Ipos + Dpos;
-  PID_virtual_pos=abs(PID_virtual_pos);
-  PID_virtual_pos=constrain(PID_virtual_pos,0,500);
+  PID_virtual_roll = Proll1 + Iroll1 + Droll1;   PID_virtual_pitch = Ppitch1 + Ipitch1 + Dpitch1;   PID_virtual_yaw = Pyaw1 + Iyaw1 + Dyaw1;   PID_virtual_alt = Palt1 + Ialt1 + Dalt1;  //PID_virtual_pos = Ppos + Ipos + Dpos;
+  // PID_virtual_pos=abs(PID_virtual_pos);
+  // PID_virtual_pos=constrain(PID_virtual_pos,0,5);
 
 //=====================================================Actual PID===============================================================
   error_roll=PID_virtual_roll-gx;
   error_pitch=PID_virtual_pitch-(gy*-1);
   error_yaw=(PID_virtual_yaw)-gz;
   error_alt=PID_virtual_alt-getAltitudeDerivative();
-  error_vel=(PID_virtual_pos*-1*0)-gps_speed;//gps.speed_cmps();;
+  // error_vel=error_roll_body;//gps.speed_cmps();;
 
   integral_error_roll+=error_roll*0.01;
   integral_error_pitch+=error_pitch*0.01;
   integral_error_yaw+=error_yaw*0.01;
   integral_error_alt+=error_alt*0.01;
-  integral_error_vel+=error_vel*0.01;
+  // integral_error_vel+=error_vel*0.01;
 
   derivative_error_roll=(error_roll-last_error_roll)/0.01;
   derivative_error_pitch=(error_pitch-last_error_pitch)/0.01;
   derivative_error_yaw=(error_yaw-last_error_yaw)/0.01;
   derivative_error_alt=(error_alt-last_error_alt)/0.01;
-  derivative_error_vel=(error_alt-last_error_vel)/0.01;
+  // derivative_error_vel=(error_vel-last_error_vel)/0.01;
 
+  Proll=Kp_roll2*error_roll;                 Ppitch=Kp_pitch2*error_pitch;                  Pyaw=Kp_yaw2*error_yaw;                Palt=Kp_alt2*error_alt;                //Pvel=Kp_pos*error_vel;
+  Iroll=Ki_roll2*integral_error_roll;        Ipitch=Ki_pitch2*integral_error_pitch;         Iyaw=Ki_yaw2*integral_error_yaw;       Ialt=Ki_alt2*integral_error_alt;       //Ivel=Ki_pos*integral_error_vel;
+  Droll=Kd_roll2*(derivative_error_roll);    Dpitch=Kd_pitch2*(derivative_error_pitch);     Dyaw=Kd_yaw2*(derivative_error_yaw);   Dalt=Kd_alt2*(derivative_error_alt);   //Dvel=Kd_pos*(derivative_error_vel);
+  last_error_roll=error_roll;                last_error_pitch=error_pitch;                  last_error_yaw=error_yaw;              last_error_alt=error_alt;              //last_error_vel=error_vel;
 
-
-  Proll=Kp_roll2*error_roll;                 Ppitch=Kp_pitch2*error_pitch;                  Pyaw=Kp_yaw2*error_yaw;                Palt=Kp_alt2*error_alt;                Pvel=Kp_vel*error_vel;
-  Iroll=Ki_roll2*integral_error_roll;        Ipitch=Ki_pitch2*integral_error_pitch;         Iyaw=Ki_yaw2*integral_error_yaw;       Ialt=Ki_alt2*integral_error_alt;       Ivel=Ki_vel*integral_error_vel;
-  Droll=Kd_roll2*(derivative_error_roll);    Dpitch=Kd_pitch2*(derivative_error_pitch);     Dyaw=Kd_yaw2*(derivative_error_yaw);   Dalt=Kd_alt2*(derivative_error_alt);   Dvel=Kd_vel*(derivative_error_vel);
-  last_error_roll=error_roll;                last_error_pitch=error_pitch;                  last_error_yaw=error_yaw;              last_error_alt=error_alt;              last_error_vel=error_vel;
-
-  PID_value_roll = Proll + Iroll + Droll;   PID_value_pitch = Ppitch + Ipitch + Dpitch;   PID_value_yaw = Pyaw + Iyaw + Dyaw;  PID_value_alt = Palt + Ialt + Dalt;  PID_value_vel = Pvel + Ivel + Dvel;
+  PID_value_roll = Proll + Iroll + Droll;   PID_value_pitch = Ppitch + Ipitch + Dpitch;   PID_value_yaw = Pyaw + Iyaw + Dyaw;  PID_value_alt = Palt + Ialt + Dalt;  //PID_value_vel = Pvel + Ivel + Dvel;
   previousTime_pid=currentTime_pid;
 
   if(PID_value_roll > PID_max){PID_value_roll = PID_max;} else if(PID_value_roll < PID_max*-1){PID_value_roll = PID_max*-1;}
   if(PID_value_pitch > PID_max){PID_value_pitch = PID_max;} else if(PID_value_pitch < PID_max*-1){PID_value_pitch = PID_max*-1;}
   if(PID_value_yaw > PID_max){PID_value_yaw = PID_max;} else if(PID_value_yaw < PID_max*-1){PID_value_yaw = PID_max*-1;}
-  if(PID_virtual_alt > 200){PID_value_alt = 200;} else if(PID_virtual_alt < -200){PID_value_alt = -200;}
-  PID_value_vel=constrain(PID_value_vel,-15,15);
+  // if(PID_virtual_alt > 200){PID_value_alt = 200;} else if(PID_virtual_alt < -200){PID_value_alt = -200;}
+  // PID_value_vel=constrain(PID_value_vel,-15,15);
   }
 
     rollControl  = PID_value_roll;
@@ -75,12 +73,20 @@ void controlDrone(){
 
 //     if(ch7 == 0 && ch5 == 1 && ch6 == 0) {latitude_init = latitude; longitude_init = longitude; latitude_home = latitude; longitude_home = longitude; init_Home = 0; waypoint_index = 0; tracking = 0; cek_heading = 0; bearing = 0;pitch_on = 0;pitch_off = 0;}
 //     if(((ch7  == 1 && head_mode == 1 && ch5 == 1 && ch6 == 0)||darurat == 1)) {waypointMission();}
-    if(ch5 == 1 && head_mode ==0){ altitudeControl_ref = altitude_m;}
-    if(ch5 == 1 && head_mode ==1){ alt_input =  altitudeControl_ref;}
-    // if(ch5 == 1 && (head_mode ==0 || pst_mode==0)){
-    //   mode_baru_aktif = true;
-    //   target_pitch=target_roll=0;
-    // }
+    if(ch5 == 1 && (head_mode ==0 || alt_mode==0)){ 
+      altitudeControl_ref = altitude_m;alt_input = altitude_m;altro=throttle_channel;
+      }
+    if(ch5 == 1 && head_mode ==1 && alt_mode==1){ 
+      altro = 1550;
+      if(z_position <= 0.6){
+        alt_input = altitudeControl_ref + 0.6;
+      }else alt_input = altitudeControl_ref;
+      // alt_input = altitudeControl_ref;      
+      }
+    if(ch5 == 1 && (head_mode ==0 || pst_mode==0 || ch6 ==1)){
+      mode_baru_aktif = true;
+      target_pitch=target_roll=0;
+    }
     // if(ch5 == 1 && head_mode ==1 && pst_mode==1){
     //     if (mode_baru_aktif) {
     //         target_lat = gps_lat;
@@ -88,23 +94,93 @@ void controlDrone(){
     //         error_pos=error_vel=integral_error_pos=integral_error_vel=derivative_error_pos=derivative_error_vel=last_error_pos=last_error_vel=0;
     //         mode_baru_aktif = false;
     //     }
-    //     double distance_cm_fast = calculate_distance_cm(gps_lat, gps_lon, target_lat, target_lon);
-    //     distance_cm = distance_cm_fast * (float)0.8 + distance_cm_fast * (float)0.2;
+    //     distance_cm = calculate_distance_cm(gps_lat, gps_lon, target_lat, target_lon);
+    //     // distance_cm = distance_cm_fast * (float)0.8 + distance_cm_fast * (float)0.2;
     //     bearing_deg = calculate_bearing_deg(gps_lat, gps_lon, target_lat, target_lon);
     //     current_heading = fixedHeadingDegrees; //compass.heading_deg();
     //     angle_to_target = bearing_deg - current_heading;
-    //     target_pitch = PID_value_vel * cos(radians(angle_to_target)) *-1;
-    //     if(target_pitch >= 0){target_pitch = target_pitch;} else if(target_pitch < 0){target_pitch /= 2;}
-    //     target_roll = PID_value_vel * sin(radians(angle_to_target)) *-1;
+        
+        
+    //     if(distance_cm > 1){
+    //       if(currentTime_GPS - previousTime_GPS <= 500){
+    //         target_pitch = PID_virtual_pos * cos(radians(angle_to_target)) *-1; if(target_pitch>5){target_pitch = 5;}else if(target_pitch<-5){target_pitch=-5;}
+    //         target_roll = PID_virtual_pos * sin(radians(angle_to_target)) *1; if(target_roll>5){target_roll = 5;}else if(target_roll<-5){target_roll=-5;}
+    //       }
+    //       else if((currentTime_GPS - previousTime_GPS >= 500) && (currentTime_GPS - previousTime_GPS <= 800)){
+    //         target_pitch = 0; target_roll = 0;
+    //       }
+    //       else previousTime_GPS = millis();
+    //     }else {target_pitch = 0; target_roll = 0;}
     // }
 
+// --- DI DALAM LOOP (Jalankan setiap ada data GPS baru) ---
+if(ch5 == 1 && head_mode == 1 && pst_mode == 1 && ch6 == 0){
+  float lat_filter;
+  float lon_filter;
+  if(mode_baru_aktif) {
+    target_lat = gps_lat; lat_filter = gps_lat;
+    target_lon = gps_lon; lon_filter = gps_lon;
+    error_pos=error_vel=integral_error_pos=integral_error_vel=derivative_error_pos=derivative_error_vel=last_error_pos=last_error_vel=0;
+    mode_baru_aktif = false;
+    }
+    // 1. FILTER RINGAN (Exponential Moving Average)
+    // Beta 0.3 artinya: 70% data lama, 30% data baru. Cukup responsif.
+    // lat_filter = (lat_filter * (1.0 - filter_beta)) + (gps_lat * filter_beta);
+    // lon_filter = (lon_filter * (1.0 - filter_beta)) + (gps_lon * filter_beta);
 
-       yawControl   = constrain(yawControl, -30, 30);
-       yawFiltered = lpf(yawControl, yawFiltered, 0.2);
-       if (abs(yawFiltered) < 2) yawFiltered = 0;
-       pitchControl = constrain(pitchControl, -400, 400);
-       rollControl  = constrain(rollControl, -400, 400);
-       altControl  = constrain(altControl, -200, 200);
+    // 2. Hitung Jarak & Sudut (CM)
+    distance_cm = calculate_distance_cm(gps_lat, gps_lon, target_lat, target_lon);
+    bearing_deg = calculate_bearing_deg(gps_lat, gps_lon, target_lat, target_lon);
+    current_heading = fixedHeadingDegrees;
+    angle_to_target = bearing_deg - current_heading;
+
+    // 3. UBAH ERROR JARAK MENJADI ERROR SUMBU (BODY FRAME)
+    // Kita pecah error jarak langsung ke sumbu Pitch dan Roll drone
+    // Ini mempermudah perhitungan Derivative per sumbu.
+    
+    // Error posisi di sumbu Pitch (Depan/Belakang) dan Roll (Kiri/Kanan)
+    error_pitch_body = distance_cm * cos(radians(angle_to_target)) * 1; // Cek polaritas
+    error_roll_body  = distance_cm * sin(radians(angle_to_target)) * 1;  // Cek polaritas
+
+    if(distance_cm > 1) { // Deadband
+      currentTime_GPS = millis();
+      if(currentTime_GPS-previousTime_GPS>99){
+        // --- RUMUS PD CONTROLLER ---
+        
+        // 1. Hitung Kecepatan Perubahan Error (Derivative)
+        // (Error sekarang - Error lalu) / waktu
+        derivative_pitch = (error_pitch_body - last_error_pitch_body) / 0.1;
+        derivative_roll  = (error_roll_body - last_error_roll_body) / 0.1;
+
+        // 2. Hitung Output (P + D)
+        // P mendorong ke target, D melawan kecepatan (ngerem)
+        float out_pitch = (Kp_pos * error_pitch_body) + (Kd_pos * derivative_pitch);
+        float out_roll  = (Kp_pos * error_roll_body)  + (Kd_pos * derivative_roll);
+
+        // 3. Update Last Error untuk siklus selanjutnya
+        last_error_pitch_body = error_pitch_body;
+        last_error_roll_body  = error_roll_body;
+
+        // 4. Batasi Sudut (Safety)
+        target_pitch = constrain(out_pitch, -max_angle, max_angle);
+        target_roll  = constrain(out_roll,  -max_angle, max_angle);
+        previousTime_GPS = currentTime_GPS;
+
+    }} else {
+        // Stop & Reset Error
+        target_pitch = 0; 
+        target_roll = 0;
+        // last_error_pitch = 0;
+        // last_error_roll = 0;
+    }
+}
+
+    yawControl   = constrain(yawControl, -30, 30);
+    yawFiltered = lpf(yawControl, yawFiltered, 0.2);
+    if (abs(yawFiltered) < 2) yawFiltered = 0;
+    pitchControl = constrain(pitchControl, -400, 400);
+    rollControl  = constrain(rollControl, -400, 400);
+    altControl  = constrain(altControl, -200, 200);
 //       AltitudeControl = minMax(AltitudeControl, -125, 110);
 
 //      if(head_mode == 1){
@@ -115,21 +191,21 @@ void controlDrone(){
 //        throttle=  thrchaottle_nnel;
 //      }
 
-  if(ch5 == 1 && head_mode == 0){ altitudeControl_ref = altitude_m;alt_input = altitude_m;}
-  if(ch5 == 1 && head_mode == 1){ alt_input =  altitudeControl_ref;}
+  // if(ch5 == 1 && head_mode == 0){ altitudeControl_ref = altitude_m;alt_input = altitude_m;}
+  // if(ch5 == 1 && head_mode == 1){ alt_input =  altitudeControl_ref;}
   // if(ch7 == 0 && ch5 == 1 && ch6 ==0) {latitude_init = gps_lat; longitude_init = gps_lon; init_Home = 0; waypoint_index = 0; tracking = 0; cek_heading = 0; bearing = 0;}
   // if(ch7 == 1 && ch5 ==1 && ch6 ==1){waypointMission();}
 
-       pulse_length_esc1 = throttle_channel + (pitchControl) + (rollControl) + pulse_escx; 
-       pulse_length_esc3 = throttle_channel - (pitchControl); 
-       pulse_length_esc2 = throttle_channel + (pitchControl) - (rollControl) + pulse_escy;
-       pulse_length_servo1 = (yawFiltered*1);
-       pulse_length_servo2 = (yawFiltered*1);
+    pulse_length_esc1 = altro + (pitchControl) + (rollControl) + altControl + pulse_escx; 
+    pulse_length_esc3 = altro - (pitchControl) + altControl; 
+    pulse_length_esc2 = altro + (pitchControl) - (rollControl) + altControl + pulse_escy;
+    pulse_length_servo1 = (yawFiltered*1);
+    pulse_length_servo2 = (yawFiltered*1);
 
     pulse_length_esc1 = constrain(pulse_length_esc1, 1100, 2000);
     pulse_length_esc2 = constrain(pulse_length_esc2, 1100, 2000);
     pulse_length_esc3 = constrain(pulse_length_esc3, 1100, 2000);
-    pulse_length_esc3 = map(pulse_length_esc3, 1100, 2000, 1100, 1800);
+    pulse_length_esc3 = map(pulse_length_esc3, 1100, 2000, 1100, 1700);
     pulse_length_servo1 = constrain(pulse_length_servo1, -25, 15);pulse_length_servo1 = map(pulse_length_servo1, -30, 30, servo1_down, servo1_up);
     pulse_length_servo2 = constrain(pulse_length_servo2, -15, 25);pulse_length_servo2 = map(pulse_length_servo2, -30, 30, servo2_down, servo2_up);
     
@@ -152,7 +228,6 @@ void controlPlane(){
 //   error_pitch2=(pitch_input1)-pitch_deg;
 //   error_alt2=alt_input-altitude_m;
   
-
 //   integral_error_roll2+=error_roll2*0.01;   integral_error_roll2 = constrain(integral_error_roll2, -15, 15);
 //   integral_error_pitch2+=error_pitch2*0.01; integral_error_pitch2 = constrain(integral_error_pitch2, -15, 15);
 //   integral_error_alt2+=error_alt2*0.01;

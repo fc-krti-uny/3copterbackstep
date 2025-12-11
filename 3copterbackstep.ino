@@ -66,21 +66,21 @@ float Kp_roll       = 4.25;              float Kp_roll2  = 2.2;
 float Ki_roll       = 0.37;              float Ki_roll2  = 0;//0.35`` 
 float Kd_roll       = 0;                float Kd_roll2  = 0;//0.9
  
-float Kp_pitch      = 3.5;                float Kp_pitch2 = 1.7;
+float Kp_pitch      = 3.4;                float Kp_pitch2 = 1.5;
 float Ki_pitch      = 0.47;              float Ki_pitch2 = 0;//0.47
 float Kd_pitch      = 0;                float Kd_pitch2 = 0;
 
 float Kp_yaw        = 1.5;                float Kp_yaw2   = 0.6;
 float Ki_yaw        = 0;                float Ki_yaw2   = 0;
 float Kd_yaw        = 0;                float Kd_yaw2   = 0;
-
-float Kp_alt        = 10;                float Kp_alt2   = 0;
+//----------------------------------------------------------------------------------
+float Kp_alt        = 100;                float Kp_alt2   = 0;
 float Ki_alt        = 0;                float Ki_alt2   = 0;
-float Kd_alt        = 4;                float Kd_alt2   = 0;
+float Kd_alt        = 40;                float Kd_alt2   = 0;
 
-float Kp_pos        = 0.3;              float Kp_vel   = 0.05;
+float Kp_pos        = 1;              float Kp_vel   = 0;
 float Ki_pos        = 0;                float Ki_vel   = 0;
-float Kd_pos        = 0;                float Kd_vel   = 0;
+float Kd_pos        = 2;                float Kd_vel   = 0;
 
 //----------------------------------------------------------------------------
 //----------------------Tuning Plane------------------------------------------
@@ -201,10 +201,10 @@ int pulse_esc11=60;
 int pulse_esc22=0; 
 int pulse_esc33=0; 
 int pulse_esc44=60;
-int roll_input, pitch_input, yaw_input, alt_input, yaw_target;
+int roll_input, pitch_input, yaw_input, yaw_target;
 int roll_input1, pitch_input1, yaw_input1;
 int pitch_transisi,pitch_transisi1,pitch_transisi2;
-float pitch_ch_previous, roll_ch_previous, yaw_ch_previous, throt_ch_previous;
+float pitch_ch_previous, roll_ch_previous, yaw_ch_previous, throt_ch_previous, alt_input;
 char inChar;
 bool mati = 0;
 int statusAktif = 0;
@@ -278,7 +278,7 @@ uint8_t MS5611_address = 0x77;             //The I2C address of the MS5611 barom
   unsigned long lastTime = millis();
   float lastRate = 0;
 
-float AltitudeBaroGround,z_position,alt_ref,estimation_altitude,altitudeControl_ref;
+float AltitudeBaroGround,z_position,alt_ref,estimation_altitude,altitudeControl_ref,altro;
 int axis;
 // ======================================================== COMPAS ======================================================================
 // Alamat I2C untuk sensor IST8310
@@ -391,6 +391,26 @@ inline void ckUpdate(uint8_t b) {
   ckA = ckA + b;
   ckB = ckB + ckA;
 }
+
+    // --- TUNING PARAMETER ---
+// Filter Beta: 0.1 (Sangat Halus/Lambat) s.d 1.0 (Tanpa Filter). 
+// Coba 0.3 untuk start.
+float filter_beta = 0.3; 
+
+// float Kp_pos = 0.08;  // Kekuatan dorong (Gas)
+// float Kd_pos = 0.15;  // Kekuatan pengereman (Rem/Damping) - NAIKKAN INI JIKA OSILASI
+float max_angle = 12.0;
+
+// Variabel Global untuk menyimpan error sebelumnya (wajib ada untuk hitung D)
+float last_error_pitch_body = 0;
+float last_error_roll_body = 0;
+unsigned long last_pid_time = 0;
+
+float derivative_pitch;
+float derivative_roll;
+
+float error_roll_body;
+float error_pitch_body;
 
 //================================================ WAYPOINT ===========================================
 
@@ -511,7 +531,6 @@ void loop() {
   // static uint32_t lastIMU=0;
   // if (millis()-lastIMU >= 20) {  // 50 Hz
   //   lastIMU = millis();
-
   // }
   get_YPR();
   compass_update();

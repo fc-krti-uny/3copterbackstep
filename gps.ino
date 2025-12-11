@@ -87,15 +87,15 @@ void printNavPvt(const NAV_PVT_t& p) {
     gps_speed = p.gSpeed / 10.0;   // mm/s -> m/s
     // gps_speed = gps_speed * (float)0.985 + gps_speed_fast * (float)0.015;
     // double spd_cms = p.gSpeed / 10.0;    // mm/s -> cm/s
-  if(ch5 == 0){ AltitudeBaroGround = alt_m; axis = 0; z_position = 0;}
-  if(ch5 == 1)
-  {
-    if(axis == 0){ 
-      alt_ref = AltitudeBaroGround;  estimation_altitude = 0; 
-    }
-    estimation_altitude = alt_m - alt_ref;
-    z_position = estimation_altitude; axis = 1;
-  }
+  // if(ch5 == 0){ AltitudeBaroGround = alt_m; axis = 0; z_position = 0;}
+  // if(ch5 == 1)
+  // {
+  //   if(axis == 0){ 
+  //     alt_ref = AltitudeBaroGround;  estimation_altitude = 0; 
+  //   }
+  //   estimation_altitude = alt_m - alt_ref;
+  //   z_position = estimation_altitude; axis = 1;
+  // }
     // Serial1.print(" Lat: "); Serial1.print(gps_lat, 7);
     // Serial1.print(" Lon: "); Serial1.print(gps_lon, 7);
     // Serial.print(" Alt(m): "); Serial.print(alt_m, 2);
@@ -154,7 +154,7 @@ double calculate_distance_cm(double lat1, double lon1, double lat2, double lon2)
     // double c_slow = c_slow * (float)0.985 + c * (float)0.015;
 
     // Jarak dalam meter, lalu ubah ke sentimeter
-    return EARTH_RADIUS_M * c *100; //100
+    return EARTH_RADIUS_M * c; //100
 }
 
 /**
